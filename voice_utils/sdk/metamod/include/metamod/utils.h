@@ -95,12 +95,12 @@ class MetaUtils {
 	/// <summary>
 	/// <para>Plugin ID.</para>
 	/// </summary>
-	static MetaPluginInfo* plugin_info_{};
+	static inline MetaPluginInfo* plugin_info_{};
 
 	/// <summary>
 	/// <para>Metamod utility functions.</para>
 	/// </summary>
-	static const MetaUtilFuncPointers* util_funcs_{};
+	static inline const MetaUtilFuncPointers* util_funcs_{};
 
 public:
 	/// <summary>

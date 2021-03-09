@@ -48,12 +48,12 @@ class GameDllHooks {
 	/// <summary>
 	/// <para>DLL hooks table.</para>
 	/// </summary>
-	static DllFuncPointers* dll_hooks_{};
+	static inline DllFuncPointers* dll_hooks_{};
 
 	/// <summary>
 	/// <para>DLL post hooks table.</para>
 	/// </summary>
-	static DllFuncPointers* dll_post_hooks_{};
+	static inline DllFuncPointers* dll_post_hooks_{};
 
 public:
 	/// <summary>
@@ -526,12 +526,12 @@ class GameDllNewHooks {
 	/// <summary>
 	/// <para>New DLL hooks table.</para>
 	/// </summary>
-	static DllNewFuncPointers* dll_new_hooks_{};
+	static inline DllNewFuncPointers* dll_new_hooks_{};
 
 	/// <summary>
 	/// <para>New DLL post hooks table.</para>
 	/// </summary>
-	static DllNewFuncPointers* dll_new_post_hooks_{};
+	static inline DllNewFuncPointers* dll_new_post_hooks_{};
 
 public:
 	/// <summary>

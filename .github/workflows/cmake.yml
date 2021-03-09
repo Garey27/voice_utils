@@ -8,7 +8,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     env:
       CMAKE_TOOLCHAIN_FILE: ${{github.workspace}}/cmake/linux-i686.cmake
 
@@ -43,4 +43,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: voiceutils
-        path: ${{github.workspace}}/bin/GNU-5.5.0/Release/voiceutils_amxx_i386.so
+        path: ${{github.workspace}}/bin/GNU-7.5.0/Release/voiceutils_amxx_i386.so

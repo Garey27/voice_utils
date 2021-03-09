@@ -355,8 +355,8 @@ void cssdk_precache_model_sounds(const char* model_path)
 	const auto file_size = static_cast<std::size_t>(std::ftell(stream));
 
 	std::fseek(stream, 0, SEEK_SET);
-	auto* buffer = new char[file_size];
-	const auto readed = std::fread(buffer, sizeof(char), file_size, stream);
+	auto* buffer = new std::byte[file_size];
+	const auto readed = std::fread(buffer, sizeof buffer[0], file_size, stream);
 
 #ifdef _MSC_VER
 	fclose(stream);

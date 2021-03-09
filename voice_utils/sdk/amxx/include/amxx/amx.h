@@ -378,12 +378,12 @@ struct AmxHeader {
 	/// <summary>
     /// <para>File format version.</para>
     /// </summary>
-	uint8_t file_version;
+	std::byte file_version;
 
 	/// <summary>
     /// <para>Required minimal version of the abstract machine.</para>
     /// </summary>
-	uint8_t amx_version;
+	std::byte amx_version;
 
 	/// <summary>
     /// <para>Flags.</para>
