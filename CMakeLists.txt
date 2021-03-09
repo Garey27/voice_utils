@@ -77,10 +77,6 @@ set_binary_output_directory("bin")
 #-------------------------------------------------------------------------------------------
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    "dep/FFmpeg_Loudness"
-    "dep/rnnoise-cmake/include"
-    "dep/soxr/src"
-    "dep/libnyquist/include"
     "voice_utils/sdk/cssdk/include"
     "voice_utils/sdk/metamod/include"
     "voice_utils/sdk/amxx/include"
@@ -171,11 +167,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-add_subdirectory("dep/rnnoise-cmake")
 add_subdirectory("dep/libnyquist")
-add_subdirectory("dep/soxr")
-add_subdirectory("dep/FFmpeg_Loudness")
-target_link_libraries(${PROJECT_NAME} libnyquist soxr rnnoise)
+target_link_libraries(${PROJECT_NAME} libnyquist)
 # GNU, Intel, Clang
 #include(${CMAKE_CXX_COMPILER_ID})
 

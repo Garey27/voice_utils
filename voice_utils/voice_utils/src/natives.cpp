@@ -7,7 +7,6 @@
 
 #include "libnyquist/Decoders.h"
 
-#include <rnnoise.h>
 #include "metamod/api.h"
 #include "metamod/utils.h"
 extern GlobalVars* g_global_vars;
