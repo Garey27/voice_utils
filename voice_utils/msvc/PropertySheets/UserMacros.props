@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <_PropertySheetDisplayName>User Macros</_PropertySheetDisplayName>
+    <LibsRoot>$(ProjectDir)..\libs</LibsRoot>
+    <DepsRoot>$(ProjectDir)..\deps</DepsRoot>
+    <CssdkRoot>$(ProjectDir)..\sdk\cssdk</CssdkRoot>
+    <MetamodRoot>$(ProjectDir)..\sdk\metamod</MetamodRoot>
+    <AmxxRoot>$(ProjectDir)..\sdk\amxx</AmxxRoot>
+    <ThirdPartyRoot>$(ProjectDir)..\third_party</ThirdPartyRoot>
+    <ProjectRoot>$(ProjectDir)..\voice_utils</ProjectRoot>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,144 @@
+#!/bin/sh
+#
+# This script will automates the steps used to producing a win32 package
+# of SoX.
+#
+# It is used on a Fedora box with mingw32 cross compiler and wine to
+# test.
+#
+# It will optionally package up VC++ version of wget if found in
+# ../wget-1.11.4.
+#
+# Various notes:
+#
+# The following command lines were used to generate the external libraries
+# SoX ships with.
+#
+# Needed for libltdl support.
+# FIXME: Install
+# cd libtool-2.4.2
+# mingw32-configure --disable-shared --enable-static;mingw32-make;sudo mingw32-make install
+#
+# yum install ming32-libpng mingw32-libpng-static
+#  or
+# cd libpng-1.6.15
+# mingw32-configure --disable-shared --enable-static;mingw32-make;sudo mingw32-make install
+#
+# yum install mingw32-wavpack
+#  or
+# cd ../wavpack-4.70.0
+# mingw32-configure --disable-shared --enable-static;mingw32-make;sudo mingw32-make install
+#
+# yum install mingw32-flac
+#  or
+# Need to disable optional ogg support to prevent duplicate symbols during
+# link.
+# Edited Makefile and removed "examples" from SUBDIRS.
+# cd ../flac-1.3.1
+# mingw32-configure --disable-ogg --disable-shared --enable-static;mingw32-make;sudo mingw32-make install
+#
+# yum install mingw32-libogg
+#  or
+# cd ../libogg-1.3.2
+# mingw32-configure --disable-shared --enable-static;mingw32-make;sudo mingw32-make install
+#
+# yum install mingw32-libvorbis
+#  or
+# cd ../libvorbis-1.3.4
+# mingw32-configure --disable-shared --enable-static;mingw-32-make;sudo mingw32-make install
+#
+# FIXME: Install libsndfile
+# Compile libsndfile after FLAC and ogg vorbis so that it will include
+# support for that.
+# MINGW work around: Can either add -lwsock32 to end of *_LDADD for any
+# failed program links or modify top leve Makefile and remove
+# "programs", "examples", "regtests", and "tests" from SUBDIRS.
+# cd ../libsndfile-1.0.25
+# mingw32-configure --disable-shared --enable-static;mingw32-make;sudo mingw32-make install
+#
+# yum install mingw32-libid3tag
+#  or
+# libid3tag does not like to be compiled shared on mingw32 cross compiler.
+# cd ../libid3tag-0.15.1b
+# mingw32-configure --disable-shared --enable-static;mingw32-make;sudo mingw32-make install
+#
+# To get MP3 header files used to enable MP3 support (no libraries used):
+#
+# yum install mingw32-libmad
+#  or
+# MINGW work around: Edit Makefile and remove -fforce-mem from CFLAGS
+# cd ../libmad-0.15.1b
+# mingw32-configure --enable-shared --disable-static;mingw32-make;sudo mingw32-make install
+
+[ ! -x configure ] && autoreconf -i
+
+SYS_ROOT="/usr/i686-w64-mingw32/sys-root"
+CONFIGURE=mingw32-configure
+DOC_TARGETS="pdf"
+DOCS="sox.pdf soxformat.pdf soxi.pdf"
+TMP_SNDFILE_LIBS="-lsndfile -lFLAC -lvorbisenc -lvorbisfile -lvorbis -logg"
+STRIP=i686-pc-mingw32-strip
+
+# Some versions of autoconf (2.63?) seem to get easily confused about
+# CPP variable. If you see warning messages about header files
+# rejected by preprocessor then its most likely from that.
+# Force the value of CPP=cpp works around that bug.
+# static versions of libsndfile do not advertise when they have
+# FLAC or ogg vorbis support.  Need to force the link ourselves.
+if [ $# -ne 0 -o ! -r Makefile ]; then
+  $CONFIGURE \
+    --with-libltdl \
+    --enable-dl-lame --enable-dl-mad --enable-dl-amrnb --enable-dl-amrwb \
+    LDFLAGS="-L/usr/local/lib" CPPFLAGS=-I/usr/local/include \
+    SNDFILE_LIBS="${TMP_SNDFILE_LIBS}" \
+    $*
+fi
+
+# Reduce total size of sox.exe by over half.
+make -s all txt $DOC_TARGETS || exit 1
+
+${STRIP} src/.libs/sox.exe
+
+dir=sox-`grep Version: sox.pc | cut -d ' ' -f 2`
+rm -rf $dir $dir-win32.zip
+mkdir -p $dir
+
+for f in ChangeLog LICENSE.GPL README README.win32; do
+  cp -p $f $dir/$f.txt
+  unix2dos $dir/$f.txt
+done
+
+binaries=src/.libs/sox.exe
+
+dlls=`/usr/i686-w64-mingw32/bin/objdump -p src/.libs/libsox-3.dll | grep "DLL Name:" | sed "s|DLL Name: |${SYS_ROOT}/mingw/bin/|" | grep -v KERNEL32.dll | grep -v msvcrt.dll | grep -v USER32.dll | grep -v WINMM.DLL`
+dlls="$dlls src/.libs/libsox-3.dll"
+dlls="$dlls ${SYS_ROOT}/mingw/bin/libwinpthread-1.dll"
+
+cp -p \
+  $binaries \
+  $dlls \
+  $DOCS \
+  scripts/batch-example.bat \
+  $dir
+
+# Special case fixup for nsiswrapper. Rename libFLAC-8.dll to libflac-8.dll.
+mv $dir/libFLAC-8.dll $dir/libflac-8.dll
+
+unix2dos $dir/batch-example.bat
+
+if test -r "../wget-1.11.4/wget.exe"; then
+  cp ../wget-1.11.4/wget.exe $dir
+  cp ../wget-1.11.4/wget.ini $dir
+fi
+
+zip -r $dir-win32.zip $dir
+
+# Optionally, create windows installer if nsiswrapper exists.
+if test -r "/usr/bin/nsiswrapper"; then
+  cd ${dir}
+  export PATH=$PATH:.
+  nsiswrapper --run --name $dir --outfile ../${dir}-win32.exe *.exe *.dll *.ini *.txt *.pdf *.bat
+  cd ..
+fi
+
+rm -rf $dir
