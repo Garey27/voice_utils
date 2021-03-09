@@ -167,7 +167,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-add_subdirectory("dep/libnyquist")
+add_subdirectory("${CMAKE_SOURCE_DIR}/dep/libnyquist")
 target_link_libraries(${PROJECT_NAME} libnyquist)
 # GNU, Intel, Clang
 #include(${CMAKE_CXX_COMPILER_ID})
