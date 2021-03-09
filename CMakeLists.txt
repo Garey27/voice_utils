@@ -176,14 +176,13 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     set( CMAKE_SHARED_LINKER_FLAGS "/EXPORT:GiveFnptrsToDll=_GiveFnptrsToDll@8" )
 else()
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpermissive -w")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -w")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpermissive -w -static")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -w -static")
 endif()
 
 target_link_libraries(${PROJECT_NAME} libnyquist
  	-static-libstdc++
 	-static-libgcc    
-	-static
 	-ldl -lm)
 # GNU, Intel, Clang
 #include(${CMAKE_CXX_COMPILER_ID})
