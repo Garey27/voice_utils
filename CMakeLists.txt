@@ -77,6 +77,8 @@ set_binary_output_directory("bin")
 #-------------------------------------------------------------------------------------------
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+    "dep/soxr/src"
+    "dep/libnyquist/include"
     "voice_utils/sdk/cssdk/include"
     "voice_utils/sdk/metamod/include"
     "voice_utils/sdk/amxx/include"
