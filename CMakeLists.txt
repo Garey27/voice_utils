@@ -15,7 +15,7 @@
 #-------------------------------------------------------------------------------------------
 
 # Require a minimum version of cmake
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 
 # Options
 option(OPT_DEBUG "Build with debugging information and runtime checks." OFF)
