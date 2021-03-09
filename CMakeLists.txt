@@ -53,18 +53,18 @@ include(ClangTidy)
 
 # Add a library target to be built from the source files
 add_library(${PROJECT_NAME} SHARED 
-"voice_utils/sdk/cssdk/src/interface.cpp"
-"voice_utils/sdk/cssdk/src/utils.cpp"
-"voice_utils/sdk/metamod/src/api.cpp"
-"voice_utils/sdk/metamod/src/engine_hooks.cpp"
-"voice_utils/sdk/metamod/src/gamedll_hooks.cpp"
-"voice_utils/sdk/metamod/src/export.cpp"
-"voice_utils/sdk/amxx/src/api.cpp"
-"voice_utils/sdk/amxx/src/string.cpp"
-"voice_utils/voice_utils/src/main.cpp"
-"voice_utils/voice_utils/src/natives.cpp"
-"voice_utils/voice_utils/src/regamedll_api.cpp"
-"voice_utils/voice_utils/src/rehlds_api.cpp"
+    "voice_utils/sdk/cssdk/src/interface.cpp"
+    "voice_utils/sdk/cssdk/src/utils.cpp"
+    "voice_utils/sdk/metamod/src/api.cpp"
+    "voice_utils/sdk/metamod/src/engine_hooks.cpp"
+    "voice_utils/sdk/metamod/src/gamedll_hooks.cpp"
+    "voice_utils/sdk/metamod/src/export.cpp"
+    "voice_utils/sdk/amxx/src/api.cpp"
+    "voice_utils/sdk/amxx/src/string.cpp"
+    "voice_utils/voice_utils/src/main.cpp"
+    "voice_utils/voice_utils/src/natives.cpp"
+    "voice_utils/voice_utils/src/regamedll_api.cpp"
+    "voice_utils/voice_utils/src/rehlds_api.cpp"
 )
 # Set the PREFIX and the SUFFIX for output binary name
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
