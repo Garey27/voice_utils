@@ -25,16 +25,6 @@ nqr::NyquistIO loader;
 extern IRevoiceApi* g_pRevoiceApi;
 std::unordered_map<size_t, std::unique_ptr<std::vector<uint8_t>>> g_audio_data;
 size_t g_numAudios = 1;
-#if 1 
-struct player_pitch
-{
-	float pitch;
-};
-std::unordered_map<size_t, player_pitch> g_map_player_pitch;
-std::unordered_map<size_t, DenoiseState*> g_map_player_denoise;
-
-
-#endif
 void clear_sounds()
 {
 	g_audio_data.clear();
@@ -69,11 +59,6 @@ uint64_t Resample_s16(const int16_t* input, int16_t* output, int inSampleRate, i
 	return outputSize;
 }
 
-CVar g_cv_test = { "REV_frame_size", "50", 0, 50.0f, nullptr };
-CVar g_cv_testpitch = { "REV_pitch", "0.9", 0, 0.9f, nullptr };
-
-CVar* g_pcv_test;
-CVar* g_pcv_testpitch;
 
 uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 {
@@ -125,50 +110,6 @@ uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 }
 void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
 {
-#if 0
-#define FRAME_SIZE 480
-	static float rnn_frames[FRAME_SIZE];
-	static short sBuff[0xffff];
-	static float fBuff[0xffff];
-	size_t olen48k = (size_t)(*sample_size * 48000.0 / sampleRate + .5);   /* Assay output len. */
-	soxr_runtime_spec_t _soxrRuntimeSpec = soxr_runtime_spec(1);
-	size_t odone48k = 0;
-	soxr_quality_spec_t _soxrQualitySpec = soxr_quality_spec(SOXR_QQ, 0);
-	soxr_io_spec_t iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
-	soxr_oneshot(sampleRate, 48000.0, 1,
-		samples, *sample_size, NULL,
-		sBuff, olen48k, &odone48k,
-		&iospec, &_soxrQualitySpec, &_soxrRuntimeSpec);
-		
-	if (g_map_player_denoise.find(clientIndex) == g_map_player_denoise.end())
-	{
-		g_map_player_denoise[clientIndex] = rnnoise_create();
-	}
-	if (g_map_player_denoise.find(clientIndex) != g_map_player_denoise.end())
-	{
-		for (int i = 0; i < odone48k; i += FRAME_SIZE)
-		{
-			for(auto j = 0; j < FRAME_SIZE;j++)
-			{
-				rnn_frames[j] = sBuff[i + j];
-			}
-			for (auto j = 0; j < FRAME_SIZE; j++)
-			{
-				sBuff[i + j] = rnn_frames[j];
-			}
-		}
-	}
-	if (g_map_player_pitch.find(clientIndex) != g_map_player_pitch.end())
-	{
-	}
-
-	
-	iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
-	soxr_oneshot(48000.0, sampleRate, 1,
-		sBuff, odone48k, NULL,
-		samples, *sample_size, sample_size,
-		&iospec, &_soxrQualitySpec, &_soxrRuntimeSpec);
-#endif
 }
 cell AMX_NATIVE_CALL IsClientSpeaking(Amx * amx, cell * params)
 {
@@ -179,15 +120,6 @@ cell AMX_NATIVE_CALL IsClientSpeaking(Amx * amx, cell * params)
 }
 
 
-#if 1
-cell AMX_NATIVE_CALL VolumeClient(Amx* amx, cell* params)
-{
-	enum args_e { arg_count, arg_index, arg_gain, arg_maxamp };
-	CHECK_ISPLAYER(arg_index);
-
-	return true;
-}
-#endif
 cell AMX_NATIVE_CALL MuteClient(Amx* amx, cell* params)
 {
 	enum args_e { arg_count, arg_index, arg_receive_index };
@@ -394,9 +326,6 @@ cell AMX_NATIVE_CALL AudioCreate(Amx* amx, cell* params)
 AmxNativeInfo VTC_Natives[] =
 {
 	{ "VU_IsClientSpeaking",	IsClientSpeaking },
-#if 1
-	{ "VU_SetVolume",			VolumeClient     },
-#endif
 	{ "VU_MuteClient",				MuteClient       },
 	{ "VU_UnmuteClient",			UnmuteClient     },
 	{ "VU_IsClientMuted",			IsClientMuted    },
@@ -419,9 +348,5 @@ AmxNativeInfo VTC_Natives[] =
 
 void RegisterNatives_REVOICE()
 {
-	g_engine_funcs.cvar_register_variable(&g_cv_test);
-	g_engine_funcs.cvar_register_variable(&g_cv_testpitch);
-	g_pcv_test = g_engine_funcs.cvar_get_pointer(g_cv_test.name);
-	g_pcv_testpitch = g_engine_funcs.cvar_get_pointer(g_cv_testpitch.name);
 	AmxxApi::add_natives(VTC_Natives);
 }
