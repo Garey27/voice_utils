@@ -181,7 +181,9 @@ else()
 endif()
 
 target_link_libraries(${PROJECT_NAME} libnyquist
- 	-static-libstdc++      
+ 	-static-libstdc++
+	-static-libgcc    
+	-static
 	-ldl -lm)
 # GNU, Intel, Clang
 #include(${CMAKE_CXX_COMPILER_ID})
