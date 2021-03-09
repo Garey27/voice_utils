@@ -178,12 +178,12 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 else()
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpermissive -w -static")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -w -static")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++
+	-static-libgcc    
+	-ldl -lm")
 endif()
 
-target_link_libraries(${PROJECT_NAME} libnyquist
- 	-static-libstdc++
-	-static-libgcc    
-	-ldl -lm)
+target_link_libraries(${PROJECT_NAME} libnyquist)
 # GNU, Intel, Clang
 #include(${CMAKE_CXX_COMPILER_ID})
 
