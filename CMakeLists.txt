@@ -152,8 +152,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL ${EXPORTS})
 # Set compiler flags
 #-------------------------------------------------------------------------------------------
 
-target_compile_features(${PROJECT_NAME} PUBLIC c_std_11)
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+#target_compile_features(${PROJECT_NAME} PUBLIC c_std_11)
+#target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/libnyquist")
 
