@@ -9,7 +9,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    container: phusion/holy-build-box-64
+    container: spritsail/alpine-cmake
     
     env:
       CMAKE_TOOLCHAIN_FILE: ${{github.workspace}}/cmake/linux-i686.cmake
