@@ -168,6 +168,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/libnyquist")
+
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC") 
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    set( CMAKE_SHARED_LINKER_FLAGS "/EXPORT:GiveFnptrsToDll=_GiveFnptrsToDll@8" )
+else()
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpermissive -w -include ${PROJECT_SOURCE_DIR}/force_link_glibc_2.13.h")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -w -include ${PROJECT_SOURCE_DIR}/force_link_glibc_2.13.h")
+endif()
+
 target_link_libraries(${PROJECT_NAME} libnyquist)
 # GNU, Intel, Clang
 #include(${CMAKE_CXX_COMPILER_ID})
