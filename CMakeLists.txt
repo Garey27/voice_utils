@@ -18,6 +18,7 @@
 cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Options
 option(OPT_DEBUG "Build with debugging information and runtime checks." OFF)
 option(OPT_NO_RTTI "Disable RTTI support." OFF)
@@ -35,14 +36,6 @@ option(OPT_LINK_LIBSTDC "Static linking with libstdc++ library." ON)
 # Set the name of the project
 project("voiceutils")
 
-# Set policies
-cmake_policy(SET CMP0017 NEW)
-cmake_policy(SET CMP0018 NEW)
-cmake_policy(SET CMP0063 NEW)
-cmake_policy(SET CMP0065 NEW)
-cmake_policy(SET CMP0069 NEW)
-cmake_policy(SET CMP0077 NEW)
-cmake_policy(SET CMP0092 NEW)
 
 # Set the search path for CMake modules to be loaded by the include()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
