@@ -42,7 +42,7 @@ endif ()
 
 option (BUILD_TESTS "Build sanity-tests." OFF)
 option (BUILD_EXAMPLES "Build examples." OFF)
-option (WITH_OPENMP "Include OpenMP threading." ON)
+option (WITH_OPENMP "Include OpenMP threading." OFF)
 option (WITH_LSR_BINDINGS "Include a `libsamplerate'-like interface." ON)
 
 cmake_dependent_option (BUILD_SHARED_LIBS
