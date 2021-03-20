@@ -18,7 +18,18 @@
 #include <unordered_map>
 
 extern void clear_sounds();
+
+	/// <summary>
+	/// <para>Plugin ID.</para>
+	/// </summary>
+MetaPluginInfo* MetaUtils::plugin_info_;
+
 /// <summary>
+/// <para>Metamod utility functions.</para>
+/// </summary>
+const MetaUtilFuncPointers* MetaUtils::util_funcs_;
+	
+	/// <summary>
 /// <para>The metamod globals.</para>
 /// </summary>
 MetaGlobals* g_meta_globals{};
