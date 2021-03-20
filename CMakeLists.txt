@@ -152,6 +152,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL ${EXPORTS})
 #target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/libnyquist")
+add_subdirectory("${CMAKE_SOURCE_DIR}/dep/soxr")
 
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC") 
