@@ -162,7 +162,7 @@ else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -w")
 endif()
 
-target_link_libraries(${PROJECT_NAME} libnyquist
+target_link_libraries(${PROJECT_NAME} libnyquist soxr
  	-static-libstdc++      
 	-ldl -lm)
 # GNU, Intel, Clang
