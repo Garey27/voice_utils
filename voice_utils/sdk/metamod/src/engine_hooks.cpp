@@ -10,7 +10,8 @@
 #include <metamod/engine.h>
 
 //-V::601
-
+EngineFuncPointers* EngineHooks::engine_hooks_;
+EngineFuncPointers* EngineHooks::engine_post_hooks_;
 /// <summary>
 /// <para>Exports the engine hooks.</para>
 /// </summary>

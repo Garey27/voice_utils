@@ -10,6 +10,10 @@
 #include <metamod/engine.h>
 
 //-V::601
+DllFuncPointers* GameDllHooks::dll_hooks_;
+DllFuncPointers* GameDllHooks::dll_post_hooks_;
+DllNewFuncPointers* GameDllNewHooks::dll_new_hooks_;
+DllNewFuncPointers* GameDllNewHooks::dll_new_post_hooks_;
 
 /// <summary>
 /// <para>Exports the GameDLL hooks.</para>

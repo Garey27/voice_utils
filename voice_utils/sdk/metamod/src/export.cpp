@@ -17,6 +17,7 @@ GlobalVars* g_global_vars{};
 
 /// <summary>
 /// </summary>
+const EngineFuncPointers* Engine::engine_funcs_;
 EngineFuncPointers g_engine_funcs{};
 
 /// <summary>
