@@ -108,9 +108,6 @@ uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 		std::make_shared<audio_wave>((uint16_t*)outputBuffer16.data(), odone16k, 1, 16000.0));
 	return audio_id;
 }
-void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
-{
-}
 cell AMX_NATIVE_CALL IsClientSpeaking(Amx * amx, cell * params)
 {
 	enum args_e { arg_count, arg_index };

@@ -28,8 +28,10 @@ void OnClientStopSpeak(size_t clientIndex)
 
 extern void RegisterNatives_REVOICE();
 
-void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size);
-
+void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
+{
+	AmxxApi::execute_forward(g_onclient_stop_speak, clientIndex, sampleRate, samples, *sample_size);
+}
 AmxxStatus on_amxx_attach()
 {
 	if (!RehldsApi::init() || !RegamedllApi::init()) {
@@ -84,6 +86,9 @@ AmxxStatus on_amxx_attach()
 
 void on_amxx_plugins_loaded()
 {
+	g_onsound_complete = AmxxApi::register_forward("VU_OnSoundDecompress",
+		ForwardExecType::Ignore, ForwardParam::Cell, ForwardParam::Float, ForwardParam::String, ForwardParam::Cell, ForwardParam::Done);
+
 	g_onsound_complete = AmxxApi::register_forward("VU_OnSoundComplete",
 		ForwardExecType::Ignore, ForwardParam::Cell, ForwardParam::Done);
 
