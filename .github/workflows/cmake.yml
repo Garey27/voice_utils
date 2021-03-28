@@ -43,5 +43,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: voiceutils
-        path: ${{github.workspace}}/bin/GNU-5.5.0/Release/voiceutils_amxx_i386.so
+        name: voice_utils
+        path: ${{github.workspace}}/bin/GNU-5.5.0/Release/voice_utils_amxx_i386.so

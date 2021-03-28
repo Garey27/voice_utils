@@ -34,7 +34,7 @@ option(OPT_LINK_LIBGCC "Static linking with libgcc library." ON)
 option(OPT_LINK_LIBSTDC "Static linking with libstdc++ library." ON)
 
 # Set the name of the project
-project("voiceutils")
+project("voice_utils")
 
 
 # Set the search path for CMake modules to be loaded by the include()
