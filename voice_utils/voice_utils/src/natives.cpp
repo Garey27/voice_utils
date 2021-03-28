@@ -75,7 +75,7 @@ uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 	{
 		frames = fileData.samples;
 	}
-	size_t olen16k = (size_t)(num_samples * 16000.0 / fileData.sampleRate + .5);   /* Assay output len. */
+	size_t olen16k = (size_t)(num_samples * 24000.0 / fileData.sampleRate + .5);   /* Assay output len. */
 	size_t olen8k = (size_t)(num_samples * 8000.0 / fileData.sampleRate + .5);   /* Assay output len. */
 
 	soxr_runtime_spec_t _soxrRuntimeSpec = soxr_runtime_spec(1);
@@ -88,12 +88,12 @@ uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 	std::vector<int16_t> outputBuffer8(olen8k);
 	soxr_io_spec_t iospec = soxr_io_spec(SOXR_FLOAT32, SOXR_INT16);
 
-	soxr_oneshot(fileData.sampleRate, 16000.0, 1,
+	soxr_oneshot(fileData.sampleRate, 24000.0, 1,
 		frames.data(), num_samples, &idone,
 		outputBuffer16.data(), olen16k, &odone16k,
 		&iospec, &_soxrQualitySpec, &_soxrRuntimeSpec);
 	iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
-	soxr_oneshot(16000.0, 8000.0, 1,
+	soxr_oneshot(24000.0, 8000.0, 1,
 		outputBuffer16.data(), olen16k, &idone,
 		outputBuffer8.data(), olen8k, &odone8k,
 		&iospec, &_soxrQualitySpec, &_soxrRuntimeSpec);
@@ -101,11 +101,11 @@ uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 	{
 		return g_pRevoiceApi->SoundAdd(
 			std::make_shared<audio_wave>((uint16_t*)outputBuffer8.data(), odone8k, 1, 8000.0),
-			std::make_shared<audio_wave>((uint16_t*)outputBuffer16.data(), odone16k, 1, 16000.0));
+			std::make_shared<audio_wave>((uint16_t*)outputBuffer16.data(), odone16k, 1, 24000.0));
 	}
 	g_pRevoiceApi->SoundPush(audio_id,
 		std::make_shared<audio_wave>((uint16_t*)outputBuffer8.data(), odone8k, 1, 8000.0),
-		std::make_shared<audio_wave>((uint16_t*)outputBuffer16.data(), odone16k, 1, 16000.0));
+		std::make_shared<audio_wave>((uint16_t*)outputBuffer16.data(), odone16k, 1, 24000.0));
 	return audio_id;
 }
 cell AMX_NATIVE_CALL IsClientSpeaking(Amx * amx, cell * params)
