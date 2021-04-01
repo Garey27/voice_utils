@@ -1,6 +1,5 @@
 #include <amxx/api.h>
 #include <voice_utils/rehlds_api.h>
-#include <voice_utils/regamedll_api.h>
 #include <voice_utils/revoice_api.h>
 
 #include "metamod/utils.h"
@@ -31,7 +30,7 @@ extern void RegisterNatives_REVOICE();
 void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size);
 AmxxStatus on_amxx_attach()
 {
-	if (!RehldsApi::init() || !RegamedllApi::init()) {
+	if (!RehldsApi::init()) {
 		return AmxxStatus::Failed;
 	}
 
