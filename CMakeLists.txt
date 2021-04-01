@@ -84,6 +84,7 @@ set_binary_output_directory("bin")
 #-------------------------------------------------------------------------------------------
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+    "dep/rnnoise/include"
     "dep/soxr/src"
     "dep/libnyquist/include"
     "voice_utils/sdk/cssdk/include"
@@ -153,6 +154,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL ${EXPORTS})
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/libnyquist")
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/soxr")
+add_subdirectory("${CMAKE_SOURCE_DIR}/dep/rnnoise")
 
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC") 
@@ -163,7 +165,7 @@ else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -w")
 endif()
 
-target_link_libraries(${PROJECT_NAME} libnyquist soxr
+target_link_libraries(${PROJECT_NAME} libnyquist soxr rnnoise
  	-static-libstdc++      
 	-ldl -lm)
 # GNU, Intel, Clang

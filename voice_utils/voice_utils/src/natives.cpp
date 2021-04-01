@@ -9,6 +9,8 @@
 
 #include "metamod/api.h"
 #include "metamod/utils.h"
+#include "rnnoise.h"
+
 extern GlobalVars* g_global_vars;
 nqr::NyquistIO loader;
 #define PARAMS_COUNT            (params[0] / sizeof(cell))
@@ -25,41 +27,56 @@ nqr::NyquistIO loader;
 extern IRevoiceApi* g_pRevoiceApi;
 std::unordered_map<size_t, std::unique_ptr<std::vector<uint8_t>>> g_audio_data;
 size_t g_numAudios = 1;
+std::unordered_map<size_t, bool> g_player_denoise_active;
+extern int g_onclient_stop_speak;
 void clear_sounds()
 {
 	g_audio_data.clear();
 }
+size_t resample_buffer(void* srcBuff, size_t srcBufLen,  void* dstBuff, size_t dstBuffLen, double srcRate, double targetRate, soxr_io_spec_t iospec)
+{	
+	soxr_quality_spec_t _soxrQualitySpec = soxr_quality_spec(SOXR_QQ, 0);
+	soxr_runtime_spec_t _soxrRuntimeSpec = soxr_runtime_spec(1);
+	size_t idone = 0;
+	size_t odone = 0;
 
+	soxr_oneshot(srcRate, targetRate, 1,
+		srcBuff, srcBufLen, &idone,
+		dstBuff, dstBuffLen, &odone,
+		&iospec, &_soxrQualitySpec, &_soxrRuntimeSpec);
 
-uint64_t Resample_s16(const int16_t* input, int16_t* output, int inSampleRate, int outSampleRate, uint64_t inputSize,
-	uint32_t channels
-) {
-	if (input == NULL)
-		return 0;
-	uint64_t outputSize = (uint64_t)(inputSize * (double)outSampleRate / (double)inSampleRate);
-	outputSize -= outputSize % channels;
-	if (output == NULL)
-		return outputSize;
-	double stepDist = ((double)inSampleRate / (double)outSampleRate);
-	const uint64_t fixedFraction = (1LL << 32);
-	const double normFixed = (1.0 / (1LL << 32));
-	uint64_t step = ((uint64_t)(stepDist * fixedFraction + 0.5));
-	uint64_t curOffset = 0;
-	for (uint32_t i = 0; i < outputSize; i += 1) {
-		for (uint32_t c = 0; c < channels; c += 1) {
-			*output++ = (int16_t)(input[c] + (input[c + channels] - input[c]) * (
-				(double)(curOffset >> 32) + ((curOffset & (fixedFraction - 1)) * normFixed)
-				)
-				);
-		}
-		curOffset += step;
-		input += (curOffset >> 32) * channels;
-		curOffset &= (fixedFraction - 1);
-	}
-	return outputSize;
+	return odone;
 }
+void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
+{
+#define FRAME_SIZE 480
+	static DenoiseState* st[33] = {nullptr};
+	if(g_player_denoise_active[clientIndex])
+	{
+		if(!st[clientIndex])
+		{
+			st[clientIndex] = rnnoise_create(NULL);
+		}
+		auto iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
+		size_t olen48k = (size_t)(*sample_size * 48000.0 / sampleRate + .5); 
+		std::vector<short> outputBuffer(olen48k);
+  		float x[FRAME_SIZE];
+		auto samplesToDenoise = resample_buffer(samples, *sample_size, outputBuffer.data(), olen48k, sampleRate, 48000.0, iospec);
+		int i = 0 ,j = 0;
 
+		while(i < samplesToDenoise)
+		{
+			for (j=0;j<FRAME_SIZE;j++) x[j] = outputBuffer[i+j];
+			auto ret = rnnoise_process_frame(st[clientIndex], x, x);
+			for (j=0;j<FRAME_SIZE;j++) outputBuffer[i+j] = x[j];
+			i += FRAME_SIZE;
+		}
+		iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
+		*sample_size = resample_buffer(outputBuffer.data(), olen48k, samples, *sample_size, 48000.0, sampleRate, iospec);
+	}
 
+	AmxxApi::execute_forward(g_onclient_stop_speak, clientIndex, sampleRate, samples, *sample_size);
+}
 uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 {
 
@@ -78,25 +95,12 @@ uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 	size_t olen16k = (size_t)(num_samples * 24000.0 / fileData.sampleRate + .5);   /* Assay output len. */
 	size_t olen8k = (size_t)(num_samples * 8000.0 / fileData.sampleRate + .5);   /* Assay output len. */
 
-	soxr_runtime_spec_t _soxrRuntimeSpec = soxr_runtime_spec(1);
-	size_t idone = 0;
-	size_t odone16k = 0;
-	size_t odone8k = 0;
-
-	soxr_quality_spec_t _soxrQualitySpec = soxr_quality_spec(SOXR_QQ, 0);
 	std::vector<int16_t> outputBuffer16(olen16k);
 	std::vector<int16_t> outputBuffer8(olen8k);
 	soxr_io_spec_t iospec = soxr_io_spec(SOXR_FLOAT32, SOXR_INT16);
-
-	soxr_oneshot(fileData.sampleRate, 24000.0, 1,
-		frames.data(), num_samples, &idone,
-		outputBuffer16.data(), olen16k, &odone16k,
-		&iospec, &_soxrQualitySpec, &_soxrRuntimeSpec);
+	auto odone16k = resample_buffer(frames.data(), num_samples, outputBuffer16.data(), olen16k, fileData.sampleRate, 24000.0, iospec);
 	iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
-	soxr_oneshot(24000.0, 8000.0, 1,
-		outputBuffer16.data(), olen16k, &idone,
-		outputBuffer8.data(), olen8k, &odone8k,
-		&iospec, &_soxrQualitySpec, &_soxrRuntimeSpec);
+	auto odone8k = resample_buffer(outputBuffer16.data(), olen16k, outputBuffer8.data(), olen8k, 24000.0, 8000.0, iospec);
 	if (!audio_id)
 	{
 		return g_pRevoiceApi->SoundAdd(
@@ -320,6 +324,25 @@ cell AMX_NATIVE_CALL AudioCreate(Amx* amx, cell* params)
 	return g_numAudios++;
 }
 
+cell AMX_NATIVE_CALL SetDenoise(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_index, arg_denoise };
+
+	CHECK_ISPLAYER(arg_index);
+
+	g_player_denoise_active[params[arg_index]-1] = params[arg_denoise];
+	return true;
+}
+
+cell AMX_NATIVE_CALL IsDenoised(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_index };
+
+	CHECK_ISPLAYER(arg_index);
+
+	return (cell)g_player_denoise_active[params[arg_index]-1];
+}
+
 AmxNativeInfo VTC_Natives[] =
 {
 	{ "VU_IsClientSpeaking",	IsClientSpeaking },
@@ -340,6 +363,8 @@ AmxNativeInfo VTC_Natives[] =
 	{ "VU_SoundSeek",				SoundSeek        },
 	{ "VU_SoundTell",				SoundTell        },
 	{ "VU_SoundLength",				SoundLength        },
+	{ "VU_IsDenoised",				IsDenoised        },
+	{ "VU_SetDenoise",				SetDenoise        },
 	{ nullptr, nullptr }
 };
 

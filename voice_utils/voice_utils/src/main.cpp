@@ -28,10 +28,7 @@ void OnClientStopSpeak(size_t clientIndex)
 
 extern void RegisterNatives_REVOICE();
 
-void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
-{
-	AmxxApi::execute_forward(g_onclient_stop_speak, clientIndex, sampleRate, samples, *sample_size);
-}
+void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size);
 AmxxStatus on_amxx_attach()
 {
 	if (!RehldsApi::init() || !RegamedllApi::init()) {
