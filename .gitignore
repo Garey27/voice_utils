@@ -24,7 +24,6 @@ mono_crash.*
 [Rr]eleases/
 [Aa][Ss]an/
 x64/
-x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
