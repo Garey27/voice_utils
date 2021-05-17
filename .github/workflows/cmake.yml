@@ -39,8 +39,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: voice_utils
-        path: ${{github.workspace}}/bin/Release/Release/voice_utils_amxx_i386.so
+        name: voice_utils_linux32
+        path: ${{github.workspace}}/bin/Release/voice_utils_amxx_i386.so
   build_windows:
     runs-on: windows-latest
     
@@ -71,6 +71,6 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: voice_utils
+        name: voice_utils_win32
         path: ${{github.workspace}}/bin/Release/Release/voice_utils_amxx.dll
 
