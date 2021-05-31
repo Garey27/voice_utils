@@ -206,7 +206,7 @@ cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 #ifdef WIN32
 	std::replace(szPath, szPath + strlen(szPath), '/', '\\');
 #else
-		std::replace(szPath, szPath + strlen(szPath), '/', '\\');
+	std::replace(szPath, szPath + strlen(szPath), '\\', '/');
 #endif
 
 	nqr::AudioData fileData;
