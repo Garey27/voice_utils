@@ -194,9 +194,9 @@ cell AMX_NATIVE_CALL SoundAddAudio(Amx* amx, cell* params)
 
 std::vector<uint8_t> ReadAllBytes(char const* filename)
 {
-    ifstream ifs(filename, ios::binary|ios::ate);
+    std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
     std::vector<uint8_t> result(ifs.tellg());
-    ifs.seekg(0, ios::beg);
+    ifs.seekg(0, std::ios::beg);
     ifs.read(&result[0], pos);
     return result;
 }
