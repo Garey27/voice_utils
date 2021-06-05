@@ -197,7 +197,7 @@ std::vector<uint8_t> ReadAllBytes(char const* filename)
     std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
     std::vector<uint8_t> result(ifs.tellg());
     ifs.seekg(0, std::ios::beg);
-    ifs.read(&result[0], pos);
+    ifs.read(&result[0], result.size());
     return result;
 }
 
