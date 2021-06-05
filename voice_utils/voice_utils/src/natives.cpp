@@ -4,7 +4,6 @@
 #include <soxr.h>
 #include <unordered_map>
 #incluse <fstream>
-#include <ifstream>
 
 #include "libnyquist/Decoders.h"
 
@@ -195,7 +194,7 @@ cell AMX_NATIVE_CALL SoundAddAudio(Amx* amx, cell* params)
 
 std::vector<uint8_t> ReadAllBytes(char const* filename)
 {
-    std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
+    std::fstream ifs(filename, std::ios::binary|std::ios::ate);
     std::vector<uint8_t> result(ifs.tellg());
     ifs.seekg(0, std::ios::beg);
     ifs.read(&result[0], result.size());
