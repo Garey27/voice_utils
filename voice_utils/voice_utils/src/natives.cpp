@@ -1,9 +1,9 @@
 #include <amxx/api.h>
 #include <amxx/string.h>
 #include <voice_utils/revoice_api.h>
-
 #include <soxr.h>
 #include <unordered_map>
+#incluse <fstream>
 
 #include "libnyquist/Decoders.h"
 
@@ -192,6 +192,15 @@ cell AMX_NATIVE_CALL SoundAddAudio(Amx* amx, cell* params)
 	}
 }
 
+std::vector<uint8_t> ReadAllBytes(char const* filename)
+{
+    ifstream ifs(filename, ios::binary|ios::ate);
+    std::vector<uint8_t> result(ifs.tellg());
+    ifs.seekg(0, ios::beg);
+    ifs.read(&result[0], pos);
+    return result;
+}
+
 cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 {
 	
@@ -212,7 +221,16 @@ cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 	nqr::AudioData fileData;
 	try
 	{
-		loader.Load(&fileData, std::string(szPath));
+		std::vector<uint8_t> buffer = ReadAllBytes(szPath);
+		const auto* extension = AmxxApi::get_amx_string(amx, params[arg_extension], 0);
+		if (strlen(extension))
+		{
+			loader.Load(&fileData, extension, buffer);
+		}
+		else
+		{
+			loader.Load(&fileData, buffer);			
+		}
 		return LoadAudio(fileData, 0);
 	}
 	catch(...)
