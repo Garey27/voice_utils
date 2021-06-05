@@ -1,9 +1,10 @@
+#include <iostream>
+#incluse <fstream>
 #include <amxx/api.h>
 #include <amxx/string.h>
 #include <voice_utils/revoice_api.h>
 #include <soxr.h>
 #include <unordered_map>
-#incluse <fstream>
 
 #include "libnyquist/Decoders.h"
 
@@ -194,7 +195,7 @@ cell AMX_NATIVE_CALL SoundAddAudio(Amx* amx, cell* params)
 
 std::vector<uint8_t> ReadAllBytes(char const* filename)
 {
-    std::fstream ifs(filename, std::ios::binary|std::ios::ate);
+    std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
     std::vector<uint8_t> result(ifs.tellg());
     ifs.seekg(0, std::ios::beg);
     ifs.read(&result[0], result.size());
