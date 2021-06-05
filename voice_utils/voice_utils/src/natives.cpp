@@ -204,7 +204,7 @@ std::vector<uint8_t> ReadAllBytes(char const* filename)
 cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 {
 	
-	enum args_e { arg_count, arg_path};
+	enum args_e { arg_count, arg_path, arg_extension};
 
 	const auto* path = AmxxApi::get_amx_string(amx, params[arg_path], 0);
 
