@@ -4,6 +4,7 @@
 #include <soxr.h>
 #include <unordered_map>
 #incluse <fstream>
+#include <ifstream>
 
 #include "libnyquist/Decoders.h"
 
