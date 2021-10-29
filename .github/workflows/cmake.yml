@@ -26,7 +26,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: voice_utils_linux32
-        path: build/bin/Release/voice_utils_amxx_i386.so
+        path: ${{github.workspace}}/bin/Release/voice_utils_amxx_i386.so
   build_windows:
     runs-on: windows-latest
     
