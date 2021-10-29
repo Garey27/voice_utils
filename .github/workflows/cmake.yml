@@ -12,36 +12,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    -
-      name: GCC multilib
-      run: |
-        sudo apt-get update && sudo apt-get install gcc-multilib g++-multilib ninja-build
-    - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
-      run: cmake -E make_directory ${{github.workspace}}/build
-
     - name: Configure CMake
       # Use a bash shell so we can use the same syntax for environment variable
       # access regardless of the host operating system
       shell: bash
-      working-directory: ${{github.workspace}}/build
       # Note the current convention is to use the -S and -B options here to specify source 
       # and build directories, but this is only available with CMake 3.13 and higher.  
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake -G Ninja $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/linux-i686.cmake
+      run:  rm -rf build && CC=icc CXX=icpc cmake -B build && cmake --build build -j8
 
-    - name: Build
-      working-directory: ${{github.workspace}}/build
-      shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build . --config Release --parallel
       
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: voice_utils_linux32
-        path: ${{github.workspace}}/bin/Release/voice_utils_amxx_i386.so
+        path: build/bin/Release/voice_utils_amxx_i386.so
   build_windows:
     runs-on: windows-latest
     
