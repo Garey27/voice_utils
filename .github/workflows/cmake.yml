@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build_linux:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     
     env:
       CMAKE_TOOLCHAIN_FILE: ${{github.workspace}}/cmake/linux-i686.cmake
