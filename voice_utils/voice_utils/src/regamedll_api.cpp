@@ -113,14 +113,14 @@ bool RegamedllApi::init()
 	//
 	// Safe check cs_entity API interface version.
 	//
-
+	/*
 	if (!check_cs_entity_version(CS_ENTITY_API_INTERFACE_VERSION)) {
 		AmxxApi::print_srv_console("[%s]: Interface CCSEntity API version '%s' not found.\n\n",
 		                           AMXX_MODULE_LOG_TAG, CS_ENTITY_API_INTERFACE_VERSION);
 
 		return false;
 	}
-
+	*/
 	//
 	// Safe check game_rules API interface version.
 	//
