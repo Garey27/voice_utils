@@ -123,7 +123,7 @@ cell AMX_NATIVE_CALL IsClientSpeaking(Amx * amx, cell * params)
 
 cell AMX_NATIVE_CALL MuteClient(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_index, arg_receive_index };
+	enum args_e { arg_count, arg_receive_index, arg_index };
 
 	CHECK_ISPLAYER(arg_index);
 
@@ -133,7 +133,7 @@ cell AMX_NATIVE_CALL MuteClient(Amx* amx, cell* params)
 
 cell AMX_NATIVE_CALL UnmuteClient(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_index, arg_receive_index };
+	enum args_e { arg_count, arg_receive_index, arg_index  };
 
 	CHECK_ISPLAYER(arg_index);
 
@@ -143,7 +143,7 @@ cell AMX_NATIVE_CALL UnmuteClient(Amx* amx, cell* params)
 
 cell AMX_NATIVE_CALL IsClientMuted(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_index, arg_receive_index };
+	enum args_e { arg_count, arg_receive_index, arg_index };
 
 	CHECK_ISPLAYER(arg_index);
 

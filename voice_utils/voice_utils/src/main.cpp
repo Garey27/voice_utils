@@ -6,6 +6,7 @@
 
 IRevoiceApi* g_pRevoiceApi;
 
+int g_onsound_decompress;
 int g_onsound_complete;
 int g_onclient_start_speak;
 int g_onclient_stop_speak;
@@ -82,9 +83,6 @@ AmxxStatus on_amxx_attach()
 
 void on_amxx_plugins_loaded()
 {
-	g_onsound_complete = AmxxApi::register_forward("VU_OnSoundDecompress",
-		ForwardExecType::Ignore, ForwardParam::Cell, ForwardParam::Float, ForwardParam::String, ForwardParam::Cell, ForwardParam::Done);
-
 	g_onsound_complete = AmxxApi::register_forward("VU_OnSoundComplete",
 		ForwardExecType::Ignore, ForwardParam::Cell, ForwardParam::Done);
 
