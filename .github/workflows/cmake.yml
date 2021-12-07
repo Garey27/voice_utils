@@ -79,16 +79,11 @@ jobs:
         with:
           name: windows
       
-      - name: Packaging bin/dbg
-        id: packaging-job
-        if: |
-          github.event_name == 'release' &&
-          github.event.action == 'published' &&
-          startsWith(github.ref, 'refs/tags/')
+      - name: Archive artifacts
         run: |
-          7z a -tzip voice_utils-bin-$RELEASE_VERSION.zip bin/Release scripting/
+          7z a -tzip voice_utils-bin-${RELEASE_VERSION}.zip bin/Release scripting/
         
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: voice_utils-bin-$RELEASE_VERSION.zip
+          files: voice_utils-bin-${RELEASE_VERSION}.zip
