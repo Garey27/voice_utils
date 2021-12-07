@@ -84,7 +84,7 @@ native VU_Buffer:VU_BufferCreate();
 * @param buffer         Bytes
 * @param bufferlen      Length of array
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_BufferPush(VU_Buffer:index, buffer[], bufferlen);
 
@@ -92,7 +92,7 @@ native VU_BufferPush(VU_Buffer:index, buffer[], bufferlen);
 * Deallocates buffer
 * @param index          Buffer index
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_BufferDel(VU_Buffer:index);
 
@@ -127,7 +127,7 @@ native VU_Sound:VU_SoundCreateFromBuffer(VU_Buffer:index, format[]="");
 *
 * @param index          Sound index
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_SoundDelete(VU_Sound:index);
 
@@ -136,7 +136,7 @@ native VU_SoundDelete(VU_Sound:index);
 *
 * @param index          Sound index
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_SoundDeleteAuto(VU_Sound:index);
 
@@ -147,7 +147,7 @@ native VU_SoundDeleteAuto(VU_Sound:index);
 * @param audio_index    Buffer index
 * @param format         Audio format eg:wav,mp3
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_SoundPushAudio(VU_Sound:index, VU_Buffer:audio_index, format[]="");
 
@@ -158,7 +158,7 @@ native VU_SoundPushAudio(VU_Sound:index, VU_Buffer:audio_index, format[]="");
 * @param receiver_id    Player thats will receive that sound
 * @param sound_index    Sound index
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_SoundPlay(index, receiver_id, VU_Sound:sound_index);
 
@@ -167,7 +167,7 @@ native VU_SoundPlay(index, receiver_id, VU_Sound:sound_index);
 *
 * @param sound_index    Sound index
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_SoundPause(VU_Sound:index);
 
@@ -178,7 +178,7 @@ native VU_SoundPause(VU_Sound:index);
 * @param pos            Position to seek into
 * @param seek           enum seekParam
 *
-* @return               Nothing
+* @noreturn
 */
 native VU_SoundSeek(VU_Sound:index, Float:pos, seekParam:seek);
 
