@@ -44,6 +44,7 @@ native bool:VU_IsClientSpeaking(const index);
 * Mutes the player.
 *
 * @param index          Client index
+* @param receiverIndex  Receiver index
 *
 * @noreturn
 */
@@ -53,6 +54,7 @@ native VU_MuteClient(const index, const receiverIndex);
 * Unmutes the player.
 *
 * @param index          Client index
+* @param receiverIndex  Receiver index
 *
 * @noreturn
 */
@@ -114,7 +116,7 @@ native VU_Sound:VU_SoundCreateFromFile(path[]);
 * Creates sound from buffer
 *
 * @param index          Buffer index
-* @param format         audio format eg:wav,mp3
+* @param format         Audio format eg:wav,mp3
 *
 * @return               Sound index or Invalid_Sound on failure
 */
@@ -174,7 +176,7 @@ native VU_SoundPause(VU_Sound:index);
 *
 * @param index          Sound index
 * @param pos            Position to seek into
-* @param seek           param
+* @param seek           enum seekParam
 *
 * @return               Nothing
 */
@@ -184,6 +186,7 @@ native VU_SoundSeek(VU_Sound:index, Float:pos, seekParam:seek);
 * Tells where is sound playing now
 *
 * @param index          Sound index
+*
 * @return               Current position
 */
 native Float:VU_SoundTell(VU_Sound:index);
@@ -192,6 +195,7 @@ native Float:VU_SoundTell(VU_Sound:index);
 * Return total sound length
 *
 * @param index          Sound index
+*
 * @return               Total sound length
 */
 native Float:VU_SoundLength(VU_Sound:index);
