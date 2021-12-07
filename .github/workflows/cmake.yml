@@ -89,4 +89,4 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: voice_utils-bin-${RELEASE_VERSION}.zip
+          files: voice_utils-bin-*.zip
