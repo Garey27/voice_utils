@@ -21,12 +21,14 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run:  rm -rf build && CC=icc CXX=icpc cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/linux-i686.cmake && cmake --build build -j8 
 
-      
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        name: voice_utils_linux32
-        path: ${{github.workspace}}/bin/Release/voice_utils_amxx_i386.so
+        files: |
+          ${{github.workspace}}/bin/Release/voice_utils_amxx_i386.so
+          ${{github.workspace}}/scripting
+          
   build_windows:
     runs-on: windows-latest
     
@@ -53,10 +55,11 @@ jobs:
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config Release --parallel
-      
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
+              
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        name: voice_utils_win32
-        path: ${{github.workspace}}/bin/Release/Release/voice_utils_amxx.dll
-
+        files: |
+          ${{github.workspace}}/bin/Release/Release/voice_utils_amxx.dll
+          ${{github.workspace}}/scripting
