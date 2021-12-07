@@ -38,6 +38,9 @@ jobs:
       # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{github.workspace}}/build/win32-msvc-xp-static-ipo.cmake
 
+    - name: Install Ninja
+      run: choco install ninja
+      
     - name: Configure CMake
       # Use a bash shell so we can use the same syntax for environment variable
       # access regardless of the host operating system
@@ -48,8 +51,6 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
 
-    - name: Install Ninja
-      run: choco install ninja
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
