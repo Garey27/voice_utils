@@ -81,7 +81,10 @@ jobs:
       
       - name: Archive artifacts
         run: |
-          7z a -tzip voice_utils-bin-${RELEASE_VERSION}.zip ${{github.workspace}}/bin/Release/Release/voice_utils_amxx.dll ${{github.workspace}}/bin/Release/voice_utils_amxx_i386.so scripting/
+          mkdir -p addons/amxmodx/modules addons/amxmodx/scripting
+          cp voice_utils_amxx.dll voice_utils_amxx_i386.so addons/amxmodx/modules
+          cp scripting/voiceutils.inc addons/amxmodx/scripting
+          7z a -tzip voice_utils-bin-${RELEASE_VERSION}.zip addons
         
       - name: Release
         uses: softprops/action-gh-release@v1
