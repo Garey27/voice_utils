@@ -48,6 +48,8 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
 
+    - name: Install Ninja
+      run: choco install ninja
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
