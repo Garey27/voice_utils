@@ -12,6 +12,19 @@
       "inheritEnvironments": [ "msvc_x86" ],
       "variables": [],
       "cmakeToolchain": "cmake/win32-msvc-xp-static-ipo.cmake"
+    },
+    {
+      "name": "x86-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x86" ],
+      "variables": [],
+      "cmakeToolchain": "cmake/win32-msvc-xp-static-ipo.cmake"
     }
   ]
 }

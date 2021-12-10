@@ -114,6 +114,7 @@ elseif(WIN32)
         CXX_STANDARD_REQUIRED ON
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" # static linking
     )
+    target_link_options(${PROJECT_NAME} PRIVATE /MACHINE:X86 /EXPORT:GiveFnptrsToDll=_GiveFnptrsToDll@8)
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         WIN32 _WINDOWS _USRDLL _WINDLL
 
