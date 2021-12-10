@@ -13,9 +13,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
-      shell: bash
       # Note the current convention is to use the -S and -B options here to specify source 
       # and build directories, but this is only available with CMake 3.13 and higher.  
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
@@ -37,13 +34,11 @@ jobs:
       run: choco install ninja      
       
     - name: Configure CMake
-      shell: bash
       working-directory: ${{github.workspace}}
       run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/win32-msvc-xp-static-ipo.cmake
 
     - name: Build
       working-directory: ${{github.workspace}}
-      shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build build --config Release --parallel
               
