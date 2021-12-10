@@ -48,7 +48,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: windows
-        path: ${{github.workspace}}/bin/Release/Release/voice_utils_amxx.dll
+        path: ${{github.workspace}}/bin/Release/voice_utils_amxx.dll
   publish:
     name: 'Publish'
     runs-on: ubuntu-latest
