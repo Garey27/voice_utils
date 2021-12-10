@@ -35,6 +35,8 @@ jobs:
       
     - name: setup devcmd
       uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
       
     - name: Configure CMake
       working-directory: ${{github.workspace}}
