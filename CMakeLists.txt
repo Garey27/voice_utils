@@ -108,9 +108,7 @@ if(UNIX)
         $<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>:
         NDEBUG RELEASE _RELEASE>
 )
-elseif(WIN32)
-    set( CMAKE_SHARED_LINKER_FLAGS "/EXPORT:GiveFnptrsToDll=_GiveFnptrsToDll@8" )
-    
+elseif(WIN32)    
     set_target_properties("${PROJECT_NAME}" PROPERTIES
         CXX_STANDARD 20
         CXX_STANDARD_REQUIRED ON
