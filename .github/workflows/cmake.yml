@@ -35,11 +35,10 @@ jobs:
       
     - name: Configure CMake
       working-directory: ${{github.workspace}}
-      run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/win32-msvc-xp-static-ipo.cmake
+      run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="cmake/win32-msvc-xp-static-ipo.cmake"
 
     - name: Build
       working-directory: ${{github.workspace}}
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build build --config Release --parallel
               
     - name: Deploy artifacts
