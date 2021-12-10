@@ -317,7 +317,7 @@ enum PCMFormat
     PCM_END
 };
 
-template<class T> T clamp(T a, T mn, T mx) { return std::max(std::min(a, mx), mn); }
+//template<class T> T clamp(T a, T mn, T mx) { return std::max(std::min(a, mx), mn); }
     
 // Src data is aligned to PCMFormat
 // @todo normalize?

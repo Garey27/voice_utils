@@ -10,7 +10,8 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x86" ],
-      "variables": []
+      "variables": [],
+      "cmakeToolchain": "cmake/win32-msvc-xp-static-ipo.cmake"
     }
   ]
 }

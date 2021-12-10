@@ -15,10 +15,7 @@
 #-------------------------------------------------------------------------------------------
 
 # Require a minimum version of cmake
-cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 # Options
 option(OPT_DEBUG "Build with debugging information and runtime checks." OFF)
 option(OPT_NO_RTTI "Disable RTTI support." OFF)
@@ -113,6 +110,12 @@ if(UNIX)
 )
 elseif(WIN32)
     set( CMAKE_SHARED_LINKER_FLAGS "/EXPORT:GiveFnptrsToDll=_GiveFnptrsToDll@8" )
+    
+    set_target_properties("${PROJECT_NAME}" PROPERTIES
+        CXX_STANDARD 20
+        CXX_STANDARD_REQUIRED ON
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" # static linking
+    )
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         WIN32 _WINDOWS _USRDLL _WINDLL
 
@@ -128,7 +131,6 @@ elseif(WIN32)
         NDEBUG RELEASE _RELEASE>
 )
   target_link_options(${PROJECT_NAME} PRIVATE /EDITANDCONTINUE /INCREMENTAL /SAFESEH:NO)
-target_compile_options(${PROJECT_NAME} PRIVATE /ZI)
 endif()
 
 # Common definitions
@@ -151,11 +153,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL ${EXPORTS})
 
 #target_compile_features(${PROJECT_NAME} PUBLIC c_std_11)
 #target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
-
+set(BUILD_SHARED_RUNTIME OFF)
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/libnyquist")
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/soxr")
 add_subdirectory("${CMAKE_SOURCE_DIR}/dep/rnnoise")
 
+    set_target_properties(libnyquist PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" # static linking
+    )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC") 
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
