@@ -162,7 +162,6 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/dep/rnnoise")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC") 
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    set( CMAKE_SHARED_LINKER_FLAGS "/EXPORT:GiveFnptrsToDll=_GiveFnptrsToDll@8" )
 
 	target_link_libraries(${PROJECT_NAME} libnyquist soxr rnnoise)
 else()
