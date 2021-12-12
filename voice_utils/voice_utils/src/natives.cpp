@@ -75,7 +75,7 @@ void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples
 		*sample_size = resample_buffer(outputBuffer.data(), olen48k, samples, *sample_size, 48000.0, sampleRate, iospec);
 	}
 
-	AmxxApi::execute_forward(g_onclient_stop_speak, clientIndex, sampleRate, samples, *sample_size);
+	//AmxxApi::execute_forward(g_onclient_stop_speak, clientIndex, sampleRate, samples, *sample_size);
 }
 uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 {
