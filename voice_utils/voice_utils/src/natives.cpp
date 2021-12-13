@@ -216,7 +216,6 @@ std::vector<uint8_t> readFile(const char* filename)
     file.seekg(0, std::ios::beg);
 
     // reserve capacity
-    std::vector<uint8_t> vec;
     vec.reserve(fileSize);
 
     // read the data:
