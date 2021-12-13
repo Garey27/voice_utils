@@ -4,6 +4,9 @@
 
 #include <soxr.h>
 #include <unordered_map>
+#include <iterator>
+#include <fstream>
+#include <iostream>
 
 #include "libnyquist/Decoders.h"
 
@@ -192,12 +195,45 @@ cell AMX_NATIVE_CALL SoundAddAudio(Amx* amx, cell* params)
 	}
 }
 
+std::vector<uint8_t> readFile(const char* filename)
+{
+    // open the file:
+    std::ifstream file(filename, std::ios::binary);
+    
+    std::vector<uint8_t> vec;
+    if (!file.is_open())
+    {
+        return vec;
+    }
+    // Stop eating new lines in binary mode!!!
+    file.unsetf(std::ios::skipws);
+
+    // get its size:
+    std::streampos fileSize;
+
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    // reserve capacity
+    vec.reserve(fileSize);
+
+    // read the data:
+    vec.insert(vec.begin(),
+               std::istream_iterator<uint8_t>(file),
+               std::istream_iterator<uint8_t>());
+
+    return vec;
+}
+
+
 cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 {
 	
-	enum args_e { arg_count, arg_path};
+	enum args_e { arg_count, arg_path, arg_extension};
 
 	const auto* path = AmxxApi::get_amx_string(amx, params[arg_path], 0);
+	const auto* extension = AmxxApi::get_amx_string(amx, params[arg_extension], 1);
 
 	char* pszGameDir = (char*)MetaUtils::get_game_info(MetaGameInfo::Directory);
 
@@ -212,7 +248,15 @@ cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 	nqr::AudioData fileData;
 	try
 	{
-		loader.Load(&fileData, std::string(szPath));
+		std::vector<uint8_t> vec = readFile(szPath);
+		if (extension && strlen(extension))
+		{	
+			loader.Load(&fileData, extension, vec);
+		}
+		else
+		{
+			loader.Load(&fileData, vec);
+		}
 		return LoadAudio(fileData, 0);
 	}
 	catch(...)
