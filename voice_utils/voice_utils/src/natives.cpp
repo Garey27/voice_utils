@@ -251,7 +251,7 @@ cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 		std::vector<uint8_t> vec = readFile(szPath);
 		if (extension && strlen(extension))
 		{	
-			loader.Load(&fileData, std::string(extension), vec);
+			loader.Load(&fileData, extension, vec);
 		}
 		else
 		{
