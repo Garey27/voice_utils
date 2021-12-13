@@ -107,10 +107,11 @@ native VU_Sound:VU_SoundCreateEmpty();
 * Creates sound from file
 *
 * @param path           Path to audio
+* @param format         Audio format eg:wav,mp3
 *
 * @return               Sound index or Invalid_Sound on failure
 */
-native VU_Sound:VU_SoundCreateFromFile(path[]);
+native VU_Sound:VU_SoundCreateFromFile(path[],extension[]="");
 
 /*
 * Creates sound from buffer
@@ -120,7 +121,7 @@ native VU_Sound:VU_SoundCreateFromFile(path[]);
 *
 * @return               Sound index or Invalid_Sound on failure
 */
-native VU_Sound:VU_SoundCreateFromBuffer(VU_Buffer:index, format[]="");
+native VU_Sound:VU_SoundCreateFromBuffer(VU_Buffer:index, extension[]="");
 
 /*
 * Deallocates sound
