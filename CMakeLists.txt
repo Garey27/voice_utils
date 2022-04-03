@@ -36,7 +36,10 @@ project("voice_utils")
 
 # Set the search path for CMake modules to be loaded by the include()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(cmake-version4git)
 
+PROJECT_VERSION_FROM_GIT()
+add_definitions(${PROJECT_VERSION4GIT_CFLAGS})
 include(Tools)
 include(Cppcheck)
 include(ClangTidy)

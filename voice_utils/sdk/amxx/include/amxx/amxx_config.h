@@ -49,7 +49,7 @@ constexpr auto AMXX_MODULE_DATE = __DATE__;
 constexpr auto AMXX_MODULE_NAME = META_PLUGIN_NAME;
 /// <summary>
 /// </summary>
-constexpr auto AMXX_MODULE_VERSION = META_PLUGIN_VERSION;
+constexpr auto AMXX_MODULE_VERSION = PROJECT_VERSION;
 /// <summary>
 /// </summary>
 constexpr auto AMXX_MODULE_AUTHOR = META_PLUGIN_AUTHOR;

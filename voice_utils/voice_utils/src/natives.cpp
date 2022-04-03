@@ -84,7 +84,7 @@ uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 	int num_samples = fileData.samples.size();
 	if (fileData.channelCount > 1)
 	{
-		frames = std::vector<float>(num_samples);
+		frames = std::vector<float>(num_samples/2);
 		nqr::StereoToMono(fileData.samples.data(), frames.data(), num_samples);
 		num_samples /= 2;
 	}
@@ -163,7 +163,7 @@ cell AMX_NATIVE_CALL SoundCreateEmpty(Amx* amx, cell* params)
 {
 	std::vector<uint16_t> placeholder_buffer(1);
 	return g_pRevoiceApi->SoundAdd(std::make_shared<audio_wave>(placeholder_buffer.data(), 1, 1, 8000.0),
-		std::make_shared<audio_wave>(placeholder_buffer.data(), 1, 1, 16000.0));
+		std::make_shared<audio_wave>(placeholder_buffer.data(), 1, 1, 24000.0));
 }
 cell AMX_NATIVE_CALL SoundAddAudio(Amx* amx, cell* params)
 {
@@ -199,7 +199,7 @@ cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 
 	const auto* path = AmxxApi::get_amx_string(amx, params[arg_path], 0);
 
-	char* pszGameDir = (char*)MetaUtils::get_game_info(MetaGameInfo::Directory);
+	char* pszGameDir = const_cast<char*>(MetaUtils::get_game_info(MetaGameInfo::Directory));
 
 	char szPath[256];
 	snprintf(szPath, sizeof(szPath), "%s/%s", pszGameDir, path);
@@ -225,7 +225,7 @@ cell AMX_NATIVE_CALL SoundAdd(Amx* amx, cell* params)
 cell AMX_NATIVE_CALL SoundDelAuto(Amx* amx, cell* params)
 {
 	enum args_e { arg_count, arg_soundid };
-	g_pRevoiceApi->SoundAutoDelete(params[arg_soundid]);
+	g_pRevoiceApi->SoundAutoClear(params[arg_soundid]);
 	return true;
 }
 cell AMX_NATIVE_CALL SoundDel(Amx* amx, cell* params)
@@ -257,6 +257,7 @@ cell AMX_NATIVE_CALL SoundPush(Amx* amx, cell* params)
 		}
 		LoadAudio(fileData, params[arg_sound_id]);
 		return 1;
+
 	}
 	catch (...)
 	{
@@ -264,32 +265,62 @@ cell AMX_NATIVE_CALL SoundPush(Amx* amx, cell* params)
 	}
 }
 
+
+cell AMX_NATIVE_CALL SoundCheck(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_sound_id, arg_audioid, arg_extension };
+	if (g_audio_data.find(params[arg_audioid]) == g_audio_data.end())
+	{
+		return 0;
+	}
+	nqr::AudioData fileData;
+	try
+	{
+		const auto* extension = AmxxApi::get_amx_string(amx, params[arg_extension], 0);
+		if (strlen(extension))
+		{
+			loader.Load(&fileData, extension, *g_audio_data[params[arg_audioid]]);
+		}
+		else
+		{
+			loader.Load(&fileData, *g_audio_data[params[arg_audioid]]);
+		}
+		return 1;
+
+	}
+	catch (...)
+	{
+		return 0;
+	}
+}
+
+
 cell AMX_NATIVE_CALL SoundPlay(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_index, arg_receive_index, arg_soundid };
-	g_pRevoiceApi->SoundPlay(params[arg_index], params[arg_receive_index], params[arg_soundid]);
+	enum args_e { arg_count, arg_playerid, arg_receive_index, arg_soundid };
+	g_pRevoiceApi->SoundPlay(params[arg_playerid], params[arg_receive_index], params[arg_soundid]);
 	return true;
 }
 
 cell AMX_NATIVE_CALL SoundPause(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_soundid };
-	g_pRevoiceApi->SoundPause(params[arg_soundid]);
+	enum args_e { arg_count, arg_playerid, arg_soundid };
+	g_pRevoiceApi->SoundPause(params[arg_playerid], params[arg_soundid]);
 
 	return true;
 }
 
 cell AMX_NATIVE_CALL SoundSeek(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_soundid, arg_seek, arg_seektype };
-	g_pRevoiceApi->SoundSeek(params[arg_soundid], amx_ctof(params[arg_seek]), static_cast<audio_wave::seekParam>(params[arg_seektype]));
+	enum args_e { arg_count, arg_playerid, arg_soundid, arg_seek, arg_seektype };
+	g_pRevoiceApi->SoundSeek(params[arg_playerid], params[arg_soundid], amx_ctof(params[arg_seek]), static_cast<seekParam>(params[arg_seektype]));
 	return true;
 }
 
 cell AMX_NATIVE_CALL SoundTell(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_soundid };	
-	return amx_ftoc(g_pRevoiceApi->SoundTell(params[arg_soundid]));
+	enum args_e { arg_count, arg_playerid, arg_soundid };
+	return amx_ftoc(g_pRevoiceApi->SoundTell(params[arg_playerid], params[arg_soundid]));
 }
 
 cell AMX_NATIVE_CALL SoundLength(Amx* amx, cell* params)
@@ -359,6 +390,7 @@ AmxNativeInfo VTC_Natives[] =
 	{ "VU_SoundDelete",				SoundDel       },
 	{ "VU_SoundPlay",				SoundPlay     },
 	{ "VU_SoundPushAudio",			SoundPush     },
+	{ "VU_SoundCheckAudio",			SoundCheck     },
 	{ "VU_SoundPause",				SoundPause    },
 	{ "VU_SoundSeek",				SoundSeek        },
 	{ "VU_SoundTell",				SoundTell        },

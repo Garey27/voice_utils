@@ -11,9 +11,9 @@ int g_onsound_complete;
 int g_onclient_start_speak;
 int g_onclient_stop_speak;
 
-void OnSoundComplete(uint32_t soundIndex)
+void OnSoundComplete(uint32_t receiverIndex, uint32_t soundIndex)
 {
-	AmxxApi::execute_forward(g_onsound_complete, soundIndex);
+	AmxxApi::execute_forward(g_onsound_complete, receiverIndex, soundIndex);
 }
 
 void OnClientStartSpeak(size_t clientIndex)
