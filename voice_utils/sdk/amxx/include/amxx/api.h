@@ -12,6 +12,7 @@
 #include <amxx/amxx_config.h>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #include <memory>
 #include <unordered_map>
 #ifndef AMXX_182_COMPATIBILITY
