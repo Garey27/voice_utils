@@ -1,7 +1,7 @@
 #include <amxx/api.h>
 #include <voice_utils/rehlds_api.h>
 #include <voice_utils/revoice_api.h>
-
+#include <unordered_map>
 #include "metamod/utils.h"
 
 IRevoiceApi* g_pRevoiceApi;
@@ -10,6 +10,7 @@ int g_onsound_decompress;
 int g_onsound_complete;
 int g_onclient_start_speak;
 int g_onclient_stop_speak;
+int g_onclient_sound_decompress;;
 
 void OnSoundComplete(uint32_t receiverIndex, uint32_t soundIndex)
 {
@@ -83,6 +84,8 @@ AmxxStatus on_amxx_attach()
 
 void on_amxx_plugins_loaded()
 {
+	g_audio_data.clear();
+	g_numAudios = 1;
 	g_onsound_complete = AmxxApi::register_forward("VU_OnSoundComplete",
 		ForwardExecType::Ignore, ForwardParam::Cell, ForwardParam::Done);
 
@@ -91,8 +94,16 @@ void on_amxx_plugins_loaded()
 
 	g_onclient_stop_speak = AmxxApi::register_forward("VU_OnStopSpeak",
 		ForwardExecType::Stop, ForwardParam::Cell, ForwardParam::Done);
+
+	g_onclient_stop_speak = AmxxApi::register_forward("VU_OnStopSpeak",
+		ForwardExecType::Stop, ForwardParam::Cell, ForwardParam::Done);
+	
+	g_onclient_sound_decompress = AmxxApi::register_forward("VU_OnDecompress",
+		ForwardExecType::Stop, ForwardParam::Cell, ForwardParam::Cell, ForwardParam::Array, ForwardParam::Cell, ForwardParam::Done);
 }
 
-void on_amxx_detach()
+void on_amxx_plugins_unloaded()
 {
+	g_audio_data.clear();
+	g_numAudios = 1;
 }

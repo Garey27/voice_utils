@@ -4,7 +4,9 @@
 
 #include <soxr.h>
 #include <unordered_map>
+#include <sstream>
 
+#include "libnyquist/Encoders.h"
 #include "libnyquist/Decoders.h"
 
 #include "metamod/api.h"
@@ -25,10 +27,11 @@ nqr::NyquistIO loader;
 #define CHECK_ISPLAYER(x)       if (unlikely(params[x] <= 0 || params[x] > g_global_vars->max_clients)) { AmxxApi::log_error(amx, AmxError::Native, "%s: invalid player index %i [%s]", __FUNCTION__, params[x], #x); return false; }
 
 extern IRevoiceApi* g_pRevoiceApi;
-std::unordered_map<size_t, std::unique_ptr<std::vector<uint8_t>>> g_audio_data;
+std::unordered_map<size_t, audio_data_s> g_audio_data;
 size_t g_numAudios = 1;
 std::unordered_map<size_t, bool> g_player_denoise_active;
 extern int g_onclient_stop_speak;
+extern int g_onclient_sound_decompress;
 void clear_sounds()
 {
 	g_audio_data.clear();
@@ -51,11 +54,11 @@ void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples
 {
 #define FRAME_SIZE 480
 	static DenoiseState* st[33] = {nullptr};
-	if(g_player_denoise_active[clientIndex])
+	if(g_player_denoise_active[clientIndex + 1])
 	{
-		if(!st[clientIndex])
+		if(!st[clientIndex + 1])
 		{
-			st[clientIndex] = rnnoise_create(NULL);
+			st[clientIndex + 1] = rnnoise_create(NULL);
 		}
 		auto iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
 		size_t olen48k = (size_t)(*sample_size * 48000.0 / sampleRate + .5); 
@@ -67,15 +70,16 @@ void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples
 		while(i < samplesToDenoise)
 		{
 			for (j=0;j<FRAME_SIZE;j++) x[j] = outputBuffer[i+j];
-			auto ret = rnnoise_process_frame(st[clientIndex], x, x);
+			auto ret = rnnoise_process_frame(st[clientIndex + 1], x, x);
 			for (j=0;j<FRAME_SIZE;j++) outputBuffer[i+j] = x[j];
 			i += FRAME_SIZE;
 		}
 		iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
 		*sample_size = resample_buffer(outputBuffer.data(), olen48k, samples, *sample_size, 48000.0, sampleRate, iospec);
 	}
-
-	//AmxxApi::execute_forward(g_onclient_stop_speak, clientIndex, sampleRate, samples, *sample_size);
+	
+ 	//AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, sampleRate, AmxxApi::prepare_cell_array(cellArr.data(), *sample_size), *sample_size);
+	AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, sampleRate, AmxxApi::prepare_char_array((char*)samples, *sample_size * 2), *sample_size * 2);
 }
 uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 {
@@ -178,11 +182,11 @@ cell AMX_NATIVE_CALL SoundAddAudio(Amx* amx, cell* params)
 		const auto* extension = AmxxApi::get_amx_string(amx, params[arg_extension], 0);
 		if (strlen(extension))
 		{
-			loader.Load(&fileData, extension, *g_audio_data[params[arg_audioid]]);
+			loader.Load(&fileData, extension, *g_audio_data[params[arg_audioid]].buffer);
 		}
 		else
 		{
-			loader.Load(&fileData, *g_audio_data[params[arg_audioid]]);			
+			loader.Load(&fileData, *g_audio_data[params[arg_audioid]].buffer);
 		}
 		return LoadAudio(fileData, 0);
 	}
@@ -249,11 +253,11 @@ cell AMX_NATIVE_CALL SoundPush(Amx* amx, cell* params)
 		const auto* extension = AmxxApi::get_amx_string(amx, params[arg_extension], 0);
 		if (strlen(extension))
 		{
-			loader.Load(&fileData, extension, *g_audio_data[params[arg_audioid]]);
+			loader.Load(&fileData, extension, *g_audio_data[params[arg_audioid]].buffer);
 		}
 		else
 		{
-			loader.Load(&fileData, *g_audio_data[params[arg_audioid]]);
+			loader.Load(&fileData, *g_audio_data[params[arg_audioid]].buffer);
 		}
 		LoadAudio(fileData, params[arg_sound_id]);
 		return 1;
@@ -279,11 +283,11 @@ cell AMX_NATIVE_CALL SoundCheck(Amx* amx, cell* params)
 		const auto* extension = AmxxApi::get_amx_string(amx, params[arg_extension], 0);
 		if (strlen(extension))
 		{
-			loader.Load(&fileData, extension, *g_audio_data[params[arg_audioid]]);
+			loader.Load(&fileData, extension, *g_audio_data[params[arg_audioid]].buffer);
 		}
 		else
 		{
-			loader.Load(&fileData, *g_audio_data[params[arg_audioid]]);
+			loader.Load(&fileData, *g_audio_data[params[arg_audioid]].buffer);
 		}
 		return 1;
 
@@ -336,21 +340,93 @@ cell AMX_NATIVE_CALL AudioDel(Amx* amx, cell* params)
 	return true;
 }
 
+cell AMX_NATIVE_CALL AudioLen(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_audioid };
+	return g_audio_data[params[arg_audioid]].buffer->size();
+}
+
 cell AMX_NATIVE_CALL AudioPush(Amx* amx, cell* params)
 {
 	enum args_e { arg_count, arg_audioid, arg_buffer, arg_bufferlen };
-	auto addr = AmxxApi::get_amx_address(amx, params[arg_buffer]);
+	cell* addr = AmxxApi::get_amx_address(amx, params[arg_buffer]);
 	for(int i = 0; i < params[arg_bufferlen]; i++)
 	{
-		g_audio_data[params[arg_audioid]]->push_back(addr[i]);
+		g_audio_data[params[arg_audioid]].buffer->push_back(addr[i]);
 	}
 	return true;
 }
 
+cell AMX_NATIVE_CALL AudioSaveToBuffer(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_audioid, arg_buffer, arg_bufferlen };
+	auto addr = AmxxApi::get_amx_address(amx, params[arg_buffer]);
+	if (g_audio_data.find(params[arg_audioid]) == g_audio_data.end())
+	{
+		return false;
+	}
+	auto len = g_audio_data[params[arg_audioid]].buffer->size() / 2;
+	size_t olen48k = (size_t)(len * 48000.0 / g_audio_data[params[arg_audioid]].sampleRate + .5);
+	std::unique_ptr<nqr::AudioData> fileData = std::make_unique<nqr::AudioData>();
+	std::ostringstream ss;
+	auto iospec = soxr_io_spec(SOXR_INT16_I, SOXR_FLOAT32_I);
+	fileData->sampleRate = 48000.f;
+	fileData->channelCount = 1;
+	fileData->sourceFormat = nqr::PCM_FLT;
+	fileData->samples = std::vector<float>(olen48k);
+	auto writted = resample_buffer(g_audio_data[params[arg_audioid]].buffer->data(), len, fileData->samples.data(), fileData->samples.size(), g_audio_data[params[arg_audioid]].sampleRate, 48000.0, iospec);
+	if (!writted || nqr::encode_opus_to_buffer({ 1, nqr::PCM_FLT, nqr::DITHER_NONE }, fileData.get(), ss))
+	{
+		return false;
+	}
+		
+	if(params[arg_bufferlen] < ss.tellp())
+	{
+		AmxxApi::log_error(amx, AmxError::Memory, "Input buffer to small (need %d bytes but %d given).", ss.tellp(), params[arg_bufferlen]);
+		return false;
+	}
+	return true;
+}
+cell AMX_NATIVE_CALL AudioSaveToFile(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_audioid, arg_path };
+	const auto* path = AmxxApi::get_amx_string(amx, params[arg_path], 0);
+
+	char* pszGameDir = const_cast<char*>(MetaUtils::get_game_info(MetaGameInfo::Directory));
+
+	char szPath[256];
+	snprintf(szPath, sizeof(szPath), "%s/%s", pszGameDir, path);
+#ifdef WIN32
+	std::replace(szPath, szPath + strlen(szPath), '/', '\\');
+#else
+	std::replace(szPath, szPath + strlen(szPath), '\\', '/');
+#endif
+	if (g_audio_data.find(params[arg_audioid]) == g_audio_data.end())
+	{
+		return false;
+	}
+
+	auto len = g_audio_data[params[arg_audioid]].buffer->size() / 2;
+	size_t olen48k = (size_t)(len * 48000.0 / g_audio_data[params[arg_audioid]].sampleRate + .5);
+	std::unique_ptr<nqr::AudioData> fileData = std::make_unique<nqr::AudioData>();
+	std::ostringstream ss;
+	auto iospec = soxr_io_spec(SOXR_INT16_I, SOXR_FLOAT32_I);
+	fileData->sampleRate = 48000.f;
+	fileData->channelCount = 1;
+	fileData->sourceFormat = nqr::PCM_FLT;
+	fileData->samples = std::vector<float>(olen48k);
+	auto writted = resample_buffer(g_audio_data[params[arg_audioid]].buffer->data(), len, fileData->samples.data(), fileData->samples.size(), g_audio_data[params[arg_audioid]].sampleRate, 48000.0, iospec);
+	if (nqr::encode_opus_to_disk({ 1, nqr::PCM_FLT, nqr::DITHER_TRIANGLE }, fileData.get(), szPath))
+	{
+		return true;
+	}
+
+	return false;
+}
 cell AMX_NATIVE_CALL AudioCreate(Amx* amx, cell* params)
 {
-	enum args_e { arg_count};
-	g_audio_data[g_numAudios] = std::make_unique<std::vector<uint8_t>>();
+	enum args_e { arg_count, arg_samplerate};
+	g_audio_data[g_numAudios] = { params[arg_samplerate], std::make_unique<std::vector<uint8_t>>() };
 	
 	return g_numAudios++;
 }
@@ -382,7 +458,10 @@ AmxNativeInfo VTC_Natives[] =
 	{ "VU_IsClientMuted",			IsClientMuted    },
 	{ "VU_BufferCreate",			AudioCreate        },
 	{ "VU_BufferPush",				AudioPush        },
+	{ "VU_BufferSaveToFile",		AudioSaveToFile		},
+	{ "VU_BufferSaveToBuffer",		AudioSaveToBuffer	},
 	{ "VU_BufferDel",				AudioDel        },
+	{ "VU_BufferLength",			AudioLen        },
 	{ "VU_SoundCreateEmpty",		SoundCreateEmpty        },
 	{ "VU_SoundCreateFromBuffer",	SoundAddAudio        },
 	{ "VU_SoundCreateFromFile",		SoundAdd        },

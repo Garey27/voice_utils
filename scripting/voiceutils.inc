@@ -13,7 +13,7 @@
  */
 enum VU_Buffer
 {
-	Invalid_BUFFER = 0
+	Invalid_BUFFER = -1
 }
 
 /*
@@ -21,7 +21,7 @@ enum VU_Buffer
  */
 enum VU_Sound
 {
-	Invalid_Sound = 0
+	Invalid_Sound = -1
 }
 
 enum seekParam
@@ -71,18 +71,37 @@ native bool:VU_IsClientMuted(const index, const receiverIndex);
 /*
 * Creates audio buffer
 *
+* @param sampleRate      Sample Rate of buffer (needs for writting data)
+*
 * @return           buffer id or Invalid_BUFFER on failure
 */
-native VU_Buffer:VU_BufferCreate();
+native VU_Buffer:VU_BufferCreate(const sampleRate);
 /*
-* Pushes bytes to buffer
+* Allocate buffer
+* @param index     Buffer index
+* @param path      path
+*
+* @return          nothing
+*/
+native VU_BufferSaveToFile(VU_Buffer:index, const path[]);
+/*
+* Saves buffer to OGG file
+* @param index      Buffer index
+* @param buffer     bytes
+* @param bufferlen  length of array
+*
+* @return          nothing
+*/
+native VU_BufferSaveToBuffer(VU_Buffer:index, const buffer[], bufferlen);
+/*
+* Save buffer to amxx OGG buffer
 * @param index      Buffer index
 * @param buffer      bytes
 * @param bufferlen      length of array
 *
 * @return          nothing
 */
-native VU_BufferPush(VU_Buffer:index, buffer[], bufferlen);
+native VU_BufferPush(VU_Buffer:index, const buffer[], bufferlen);
 /*
 * Deallocates buffer
 * @param index      Buffer index
@@ -90,6 +109,13 @@ native VU_BufferPush(VU_Buffer:index, buffer[], bufferlen);
 * @return          nothing
 */
 native VU_BufferDel(VU_Buffer:index);
+/*
+* Get number samples in buffer
+* @param index      Buffer index
+*
+* @return          number samples in buffer
+*/
+native VU_BufferLength(VU_Buffer:index);
 /*
 * Creates empty sound
 *
@@ -207,7 +233,18 @@ forward VU_OnStartSpeak(const index);
 * @noreturn
 */
 forward VU_OnStopSpeak(const index);
+
 /*
+* Called when the player's voice data uncompressed (This can call twice if there both Legacy(SPEEX) and Steam players)
+*
+* @param index			Client index
+* @param sampleRate     Sample rate of current samples
+* @param samples		samples buffer
+* @param n_samples		number of samples
+*
+* @noreturn
+*/
+forward VU_OnDecompress(const index, const sampleRate, const samples[], n_samples);
+
 native VU_IsDenoised(const index);
 native VU_SetDenoise(const index, bool:active);
-*/

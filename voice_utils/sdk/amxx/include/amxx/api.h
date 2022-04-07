@@ -12,7 +12,8 @@
 #include <amxx/amxx_config.h>
 #include <type_traits>
 #include <utility>
-
+#include <memory>
+#include <unordered_map>
 #ifndef AMXX_182_COMPATIBILITY
 #include <amxx/game_configs.h>
 #endif
@@ -1102,3 +1103,12 @@ void AMXX_PLUGINS_UNLOADED();
 #ifdef AMXX_PLUGINS_UNLOADING
 void AMXX_PLUGINS_UNLOADING();
 #endif
+
+struct audio_data_s
+{
+	int sampleRate;
+	std::unique_ptr<std::vector<uint8_t>> buffer;
+};
+
+extern std::unordered_map<size_t, audio_data_s> g_audio_data;
+extern size_t g_numAudios;

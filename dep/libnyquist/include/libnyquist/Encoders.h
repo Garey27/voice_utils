@@ -38,6 +38,8 @@ namespace nqr
     // Assume data adheres to EncoderParams, except for bit depth and fmt which are re-formatted
     // to satisfy the Ogg/Opus spec.
     int encode_opus_to_disk(const EncoderParams p, const AudioData * d, const std::string & path);
+    int encode_opus_to_buffer(const EncoderParams p, const AudioData* d, std::ostream& buff);
+
 
 } // end namespace nqr
 

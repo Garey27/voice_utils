@@ -298,13 +298,13 @@ class OggWriter
 	int channel_count;
 	long sample_rate;
 	int bits_per_sample;
-	std::ofstream * ostream;
+	std::ostream * ostream;
 	std::string description;
 	std::vector<metadata_t> metadata;
 
 public:
 
-	OggWriter(int channel_count, long sample_rate, int bits_per_sample, std::ofstream & stream, const std::vector<metadata_t> & md)
+	OggWriter(int channel_count, long sample_rate, int bits_per_sample, std::ostream & stream, const std::vector<metadata_t> & md)
 	{
 		this->channel_count = channel_count;
 		this->sample_rate = sample_rate;
@@ -408,7 +408,6 @@ int nqr::encode_opus_to_disk(const EncoderParams p, const AudioData * d, const s
 	if (!enc) throw std::runtime_error("opus_encoder_create caused an error!");
 
 	std::ofstream fout(path.c_str(), std::ios::out | std::ios::binary);
-
 	std::vector<metadata_t> oggMetadata = { { "artist", "dimitri" } };
 	OggWriter writer(d->channelCount, d->sampleRate, GetFormatBitsPerSample(d->sourceFormat), fout, oggMetadata);
 
@@ -439,4 +438,48 @@ int nqr::encode_opus_to_disk(const EncoderParams p, const AudioData * d, const s
 	return EncoderError::NoError;
 }
 
+
+// Opus only supports a 48k samplerate...
+// This encoder only supports mono for the time being
+int nqr::encode_opus_to_buffer(const EncoderParams p, const AudioData* d, std::ostream& buff)
+{
+	assert(d->samples.size() > 0);
+	//assert(d->sampleRate == 48000);
+
+	float* sampleData = const_cast<float*>(d->samples.data());
+	const size_t sampleDataSize = d->samples.size();
+
+	int opus_error;
+	OpusEncoder* enc;
+	enc = opus_encoder_create(48000, 1, OPUS_APPLICATION_AUDIO, &opus_error);
+	if (!enc) throw std::runtime_error("opus_encoder_create caused an error!");
+
+
+	std::vector<metadata_t> oggMetadata = { { "artist", "dimitri" } };
+	OggWriter writer(d->channelCount, d->sampleRate, GetFormatBitsPerSample(d->sourceFormat), buff, oggMetadata);
+
+	std::vector<uint8_t> outBuffer(OPUS_MAX_PACKET_SIZE);
+
+	int framesToEncode = (sampleDataSize / OPUS_FRAME_SIZE) - 1; // fixme
+
+	while (framesToEncode >= 0)
+	{
+		auto encoded_size = opus_encode_float(enc, sampleData, OPUS_FRAME_SIZE, outBuffer.data(), OPUS_MAX_PACKET_SIZE);
+
+		if (encoded_size < 0)
+		{
+			std::cerr << "Bad Opus Status: " << encoded_size << std::endl;
+			return EncoderError::FileIOError;
+		}
+
+		writer.write((char*)outBuffer.data(), encoded_size, OPUS_FRAME_SIZE, (framesToEncode == 0) ? true : false);
+
+		framesToEncode--;
+		sampleData += OPUS_FRAME_SIZE;
+	}
+
+	opus_encoder_destroy(enc);
+
+	return EncoderError::NoError;
+}
 #undef OPUS_MAX_PACKET_SIZE
