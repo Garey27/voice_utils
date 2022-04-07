@@ -100,6 +100,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # Platform-specific definitions
 if(UNIX)
+    set_target_properties("${PROJECT_NAME}" PROPERTIES
+        CXX_STANDARD 20
+        CXX_STANDARD_REQUIRED ON
+    )
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         LINUX linux POSIX _LINUX
 
