@@ -12,6 +12,9 @@
 #include "metamod/api.h"
 #include "metamod/utils.h"
 #include "rnnoise.h"
+#define STB_FFT_IMPLEMENTAION
+#include "misc/stf_fft.h"
+#include "misc/pitch_shift.h"
 
 extern GlobalVars* g_global_vars;
 nqr::NyquistIO loader;
@@ -30,6 +33,7 @@ extern IRevoiceApi* g_pRevoiceApi;
 std::unordered_map<size_t, audio_data_s> g_audio_data;
 size_t g_numAudios = 1;
 std::unordered_map<size_t, bool> g_player_denoise_active;
+std::unordered_map<size_t, float> g_player_pitch;
 extern int g_onclient_stop_speak;
 extern int g_onclient_sound_decompress;
 void clear_sounds()
@@ -54,11 +58,11 @@ void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples
 {
 #define FRAME_SIZE 480
 	static DenoiseState* st[33] = {nullptr};
-	if(g_player_denoise_active[clientIndex + 1])
+	if(g_player_denoise_active[clientIndex])
 	{
-		if(!st[clientIndex + 1])
+		if(!st[clientIndex])
 		{
-			st[clientIndex + 1] = rnnoise_create(NULL);
+			st[clientIndex] = rnnoise_create(NULL);
 		}
 		auto iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
 		size_t olen48k = (size_t)(*sample_size * 48000.0 / sampleRate + .5); 
@@ -77,7 +81,23 @@ void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples
 		iospec = soxr_io_spec(SOXR_INT16, SOXR_INT16);
 		*sample_size = resample_buffer(outputBuffer.data(), olen48k, samples, *sample_size, 48000.0, sampleRate, iospec);
 	}
-	
+
+	if (g_player_pitch.find(clientIndex) != g_player_pitch.end())
+	{
+		if (g_player_pitch[clientIndex ] != 1.f)
+		{
+			float pitchShift = g_player_pitch[clientIndex];
+
+			size_t ms = 20;
+			size_t frameSize = sampleRate * ms / 1000;
+			frameSize += frameSize % 2;
+			planData pitchPlanData = { 0 };
+			makePlanData(frameSize, sampleRate, &pitchPlanData);
+			pitchshift(pitchShift, (short*)samples, (short*)samples, *sample_size, &pitchPlanData);
+
+			freePlanData(&pitchPlanData);
+		}
+	}
  	//AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, sampleRate, AmxxApi::prepare_cell_array(cellArr.data(), *sample_size), *sample_size);
 	AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, sampleRate, AmxxApi::prepare_char_array((char*)samples, *sample_size * 2), *sample_size * 2);
 }
@@ -431,6 +451,17 @@ cell AMX_NATIVE_CALL AudioCreate(Amx* amx, cell* params)
 	return g_numAudios++;
 }
 
+cell AMX_NATIVE_CALL SetPitch(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_index, arg_pitch };
+
+	CHECK_ISPLAYER(arg_index);
+
+	g_player_pitch[params[arg_index] - 1] = amx_ctof(params[arg_pitch]);
+ 	return true;
+}
+
+
 cell AMX_NATIVE_CALL SetDenoise(Amx* amx, cell* params)
 {
 	enum args_e { arg_count, arg_index, arg_denoise };
@@ -476,6 +507,7 @@ AmxNativeInfo VTC_Natives[] =
 	{ "VU_SoundLength",				SoundLength        },
 	{ "VU_IsDenoised",				IsDenoised        },
 	{ "VU_SetDenoise",				SetDenoise        },
+	{ "VU_SetPitch",				SetPitch        },
 	{ nullptr, nullptr }
 };
 

@@ -13,7 +13,7 @@
  */
 enum VU_Buffer
 {
-	Invalid_BUFFER = -1
+	Invalid_BUFFER = 0
 }
 
 /*
@@ -21,7 +21,7 @@ enum VU_Buffer
  */
 enum VU_Sound
 {
-	Invalid_Sound = -1
+	Invalid_Sound = 0
 }
 
 enum seekParam
@@ -248,3 +248,4 @@ forward VU_OnDecompress(const index, const sampleRate, const samples[], n_sample
 
 native VU_IsDenoised(const index);
 native VU_SetDenoise(const index, bool:active);
+native VU_SetPitch(const index, Float:pitch);
