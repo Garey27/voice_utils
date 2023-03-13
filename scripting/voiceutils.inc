@@ -244,10 +244,10 @@ forward VU_OnStopSpeak(const index);
 *
 * @noreturn
 */
-forward VU_OnDecompress(const index, const sampleRate, const samples[], n_samples);
+forward VU_OnDecompress(const index, const receiver, const sampleRate, const samples[], n_samples);
 
 native VU_IsDenoised(const index);
 native VU_SetDenoise(const index, bool:active);
 native VU_SetPitch(const index, Float:pitch);
 // 0.0 - 1.0
-native VU_SetVolume(const index, Float:volume);
+native VU_SetVolume(const sender, const receiver, Float:volume);

@@ -64,13 +64,13 @@ void OnSoundDecompress(size_t clientIndex, size_t receiverIndex, uint16_t sample
 	if(receiverIndex == size_t(-1))
 		receiverIndex = 0;
 	
-	if (g_player_volume[clientIndex][receiverIndex])
+	if (g_player_volume[clientIndex+1][receiverIndex])
 	{
 		size_t size = *sample_size;
 		int16_t* samples16 = (int16_t*)samples;
 		for (auto i = 0u; i < size; i++)
 		{
-			samples16[i] *= g_player_volume[clientIndex][receiverIndex];
+			samples16[i] *= g_player_volume[clientIndex+1][receiverIndex];
 
 			if (samples16[i] > std::numeric_limits<int16>::max()) { samples16[i] = std::numeric_limits<int16>::max(); }
 			if (samples16[i] < std::numeric_limits<int16>::min()) { samples16[i] = std::numeric_limits<int16>::min(); }
@@ -479,7 +479,7 @@ cell AMX_NATIVE_CALL SetVolume(Amx* amx, cell* params)
 	{
 		params[arg_receiver] = 0;
 	};
-	g_player_volume[params[arg_sender] - 1][params[arg_receiver]] = amx_ctof(params[arg_volume]);
+	g_player_volume[params[arg_sender]][params[arg_receiver]] = amx_ctof(params[arg_volume]);
 	return true;
 }
 
