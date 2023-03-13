@@ -35,7 +35,7 @@ std::unordered_map<size_t, audio_data_s> g_audio_data;
 size_t g_numAudios = 1;
 std::unordered_map<size_t, bool> g_player_denoise_active;
 std::unordered_map<size_t, float> g_player_pitch;
-std::unordered_map<size_t, float> g_player_volume;
+std::unordered_map<size_t, std::array<float, 33>> g_player_volume;
 extern int g_onclient_stop_speak;
 extern int g_onclient_sound_decompress;
 void clear_sounds()
@@ -56,17 +56,21 @@ size_t resample_buffer(void* srcBuff, size_t srcBufLen,  void* dstBuff, size_t d
 
 	return odone;
 }
-void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
+void OnSoundDecompress(size_t clientIndex, size_t receiverIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
 {
+	AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, receiverIndex, sampleRate, AmxxApi::prepare_char_array((char*)samples, *sample_size * 2), *sample_size * 2);
 #define FRAME_SIZE 480
 	static DenoiseState* st[33] = {nullptr};
-	if (g_player_volume[clientIndex])
+	if(receiverIndex == size_t(-1))
+		receiverIndex = 0;
+	
+	if (g_player_volume[clientIndex][receiverIndex])
 	{
 		size_t size = *sample_size;
 		int16_t* samples16 = (int16_t*)samples;
 		for (auto i = 0u; i < size; i++)
 		{
-			samples16[i] *= g_player_volume[clientIndex];
+			samples16[i] *= g_player_volume[clientIndex][receiverIndex];
 
 			if (samples16[i] > std::numeric_limits<int16>::max()) { samples16[i] = std::numeric_limits<int16>::max(); }
 			if (samples16[i] < std::numeric_limits<int16>::min()) { samples16[i] = std::numeric_limits<int16>::min(); }
@@ -114,7 +118,6 @@ void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples
 		}
 	}
  	//AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, sampleRate, AmxxApi::prepare_cell_array(cellArr.data(), *sample_size), *sample_size);
-	AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, sampleRate, AmxxApi::prepare_char_array((char*)samples, *sample_size * 2), *sample_size * 2);
 }
 uint32_t LoadAudio(nqr::AudioData& fileData, uint32_t audio_id)
 {
@@ -469,11 +472,14 @@ cell AMX_NATIVE_CALL AudioCreate(Amx* amx, cell* params)
 
 cell AMX_NATIVE_CALL SetVolume(Amx* amx, cell* params)
 {
-	enum args_e { arg_count, arg_index, arg_volume };
+	enum args_e { arg_count, arg_sender, arg_receiver, arg_volume };
 
-	CHECK_ISPLAYER(arg_index);
-
-	g_player_volume[params[arg_index] - 1] = amx_ctof(params[arg_volume]);
+	CHECK_ISPLAYER(arg_sender);
+	if(params[arg_receiver] > 32 || params[arg_receiver] < 0)
+	{
+		params[arg_receiver] = 0;
+	};
+	g_player_volume[params[arg_sender] - 1][params[arg_receiver]] = amx_ctof(params[arg_volume]);
 	return true;
 }
 

@@ -42,11 +42,11 @@ class audio_wave
 	float wav_length;
 	std::vector<uint16_t> data_;
 public:
-
+	
 	audio_wave(uint16_t* data, size_t samples_count, unsigned  channels, unsigned sampleRate)
 		: data_(data, data + samples_count), channels(channels), sample_rate_(sampleRate)
 	{
-
+		
 		wav_length = static_cast<float>(samples_count) / sampleRate / channels;
 	}
 	~audio_wave()
@@ -109,7 +109,7 @@ public:
 
 	virtual IEvent<size_t>& OnClientStartSpeak() = 0;
 	virtual IEvent<size_t>& OnClientStopSpeak() = 0;
-	virtual IEvent<size_t, uint16_t, uint8_t*, size_t*>& OnDecompress() = 0;
+	virtual IEvent<size_t, size_t, uint16_t, uint8_t*, size_t*>& OnDecompress() = 0;
 	virtual IEvent<uint32_t, uint32_t>& OnSoundComplete() = 0;
 
 	virtual void MuteClient(size_t clientIndex, size_t receiverIndex = 0) = 0;
