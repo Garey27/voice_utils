@@ -58,13 +58,18 @@ size_t resample_buffer(void* srcBuff, size_t srcBufLen,  void* dstBuff, size_t d
 }
 void OnSoundDecompress(size_t clientIndex, size_t receiverIndex, uint16_t sampleRate, uint8_t* samples, size_t* sample_size)
 {
-	AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, receiverIndex, sampleRate, AmxxApi::prepare_char_array((char*)samples, *sample_size * 2), *sample_size * 2);
+	auto ret  = AmxxApi::execute_forward(g_onclient_sound_decompress, clientIndex + 1, receiverIndex);
+	if (ret)
+	{
+		*sample_size = 0;
+	}
+
 #define FRAME_SIZE 480
 	static DenoiseState* st[33] = {nullptr};
 	if(receiverIndex == size_t(-1))
 		receiverIndex = 0;
 	
-	if (g_player_volume[clientIndex+1][receiverIndex])
+	if (g_player_volume.find(clientIndex+1) != g_player_volume.end())
 	{
 		size_t size = *sample_size;
 		int16_t* samples16 = (int16_t*)samples;

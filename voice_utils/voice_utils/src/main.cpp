@@ -99,7 +99,7 @@ void on_amxx_plugins_loaded()
 		ForwardExecType::Stop, ForwardParam::Cell, ForwardParam::Done);
 	
 	g_onclient_sound_decompress = AmxxApi::register_forward("VU_OnDecompress",
-		ForwardExecType::Stop, ForwardParam::Cell, ForwardParam::Cell, ForwardParam::Cell, ForwardParam::Array, ForwardParam::Cell, ForwardParam::Done);
+		ForwardExecType::Stop, ForwardParam::Cell, ForwardParam::Cell, ForwardParam::Done);
 }
 
 void on_amxx_plugins_unloaded()
