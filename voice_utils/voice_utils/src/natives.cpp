@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <amxx/api.h>
 #include <amxx/string.h>
 #include <voice_utils/revoice_api.h>
@@ -34,6 +35,7 @@ std::unordered_map<size_t, audio_data_s> g_audio_data;
 size_t g_numAudios = 1;
 std::unordered_map<size_t, bool> g_player_denoise_active;
 std::unordered_map<size_t, float> g_player_pitch;
+std::unordered_map<size_t, float> g_player_volume;
 extern int g_onclient_stop_speak;
 extern int g_onclient_sound_decompress;
 void clear_sounds()
@@ -58,6 +60,19 @@ void OnSoundDecompress(size_t clientIndex, uint16_t sampleRate, uint8_t* samples
 {
 #define FRAME_SIZE 480
 	static DenoiseState* st[33] = {nullptr};
+	if (g_player_volume[clientIndex])
+	{
+		size_t size = *sample_size;
+		int16_t* samples16 = (int16_t*)samples;
+		for (auto i = 0u; i < size; i++)
+		{
+			samples16[i] *= g_player_volume[clientIndex];
+
+			if (samples16[i] > std::numeric_limits<int16>::max()) { samples16[i] = std::numeric_limits<int16>::max(); }
+			if (samples16[i] < std::numeric_limits<int16>::min()) { samples16[i] = std::numeric_limits<int16>::min(); }
+		}
+	}
+
 	if(g_player_denoise_active[clientIndex])
 	{
 		if(!st[clientIndex])
@@ -451,6 +466,17 @@ cell AMX_NATIVE_CALL AudioCreate(Amx* amx, cell* params)
 	return g_numAudios++;
 }
 
+
+cell AMX_NATIVE_CALL SetVolume(Amx* amx, cell* params)
+{
+	enum args_e { arg_count, arg_index, arg_volume };
+
+	CHECK_ISPLAYER(arg_index);
+
+	g_player_volume[params[arg_index] - 1] = amx_ctof(params[arg_volume]);
+	return true;
+}
+
 cell AMX_NATIVE_CALL SetPitch(Amx* amx, cell* params)
 {
 	enum args_e { arg_count, arg_index, arg_pitch };
@@ -508,6 +534,7 @@ AmxNativeInfo VTC_Natives[] =
 	{ "VU_IsDenoised",				IsDenoised        },
 	{ "VU_SetDenoise",				SetDenoise        },
 	{ "VU_SetPitch",				SetPitch        },
+	{ "VU_SetVolume",				SetVolume        },
 	{ nullptr, nullptr }
 };
 
