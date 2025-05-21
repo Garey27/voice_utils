@@ -4,8 +4,9 @@ on: [push, pull_request]
 
 jobs:
   build_linux:
-    runs-on: ubuntu-latest
-    container: s1lentq/linux86buildtools:latest
+    runs-on: ubuntu-latest    
+    container:
+      image: debian:11-slim
     
     steps:
     
