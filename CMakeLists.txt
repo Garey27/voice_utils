@@ -15,7 +15,7 @@
 #-------------------------------------------------------------------------------------------
 
 # Require a minimum version of cmake
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 # Options
 option(OPT_DEBUG "Build with debugging information and runtime checks." OFF)
 option(OPT_NO_RTTI "Disable RTTI support." OFF)
