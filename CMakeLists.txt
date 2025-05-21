@@ -178,7 +178,6 @@ else()
 
 	target_link_libraries(${PROJECT_NAME} libnyquist soxr rnnoise
  	-static-libstdc++ 
-	-static-intel -no-intel-extensions
 	-ldl -lm)
 endif()
 # GNU, Intel, Clang
